@@ -6,7 +6,7 @@ export default function Home() {
 
   return (
     <div className="text-center mt-10">
-      <h1 className="text-3xl font-bold">Welcome to MARZ, A NittanyBusiness</h1>
+      <h1 className="text-3xl font-bold">Welcome to MARZ, a NittanyBusiness</h1>
       {session ? (
         <p className="text-green-500 mt-4">You are logged in as {session.user?.email}</p>
       ) : (

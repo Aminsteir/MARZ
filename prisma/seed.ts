@@ -16,7 +16,14 @@ async function readCSV(filePath: string) {
     const results: any[] = [];
     fs.createReadStream(filePath)
       .pipe(csvParser())
-      .on("data", (data) => results.push(data))
+      .on("data", (data) => {
+        const cleanedData: any = {};
+        for (const key in data) {
+          const cleanKey = key.replace(/^\uFEFF/, "");
+          cleanedData[cleanKey] = data[key];
+        }
+        results.push(cleanedData);
+      })
       .on("end", () => resolve(results))
       .on("error", (error) => reject(error));
   });
@@ -29,12 +36,15 @@ async function seedDatabase() {
 
     const users = await readCSV(path.join(__dirname, "../data/Users.csv"));
 
+    const salt = await bcrypt.genSalt(10)
+    console.log("Salt (for all users): " + salt)
+
     console.log("Inserting Users...");
     for (const user of users) {
         await prisma.user.create({
             data: {
-                email: user.email.trim(),
-                password: await bcrypt.hash(user.password.trim(), 10),
+                email: user.email,
+                password: await bcrypt.hash(user.password.trim(), salt),
             },
         });
     }
