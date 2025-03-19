@@ -3,6 +3,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import csvParser from "csv-parser";
+import stripBom from "strip-bom-stream";
 import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
@@ -15,15 +16,9 @@ async function readCSV(filePath: string) {
   return new Promise<any[]>((resolve, reject) => {
     const results: any[] = [];
     fs.createReadStream(filePath)
+      .pipe(stripBom()) // BYTE ORDER MARK (BOM) CAUSING PROBLEMS
       .pipe(csvParser())
-      .on("data", (data) => {
-        const cleanedData: any = {};
-        for (const key in data) {
-          const cleanKey = key.replace(/^\uFEFF/, ""); // BYTE ORDER MARK (BOM) CAUSING PROBLEMS
-          cleanedData[cleanKey] = data[key];
-        }
-        results.push(cleanedData);
-      })
+      .on("data", (data) => results.push(data))
       .on("end", () => resolve(results))
       .on("error", (error) => reject(error));
   });
