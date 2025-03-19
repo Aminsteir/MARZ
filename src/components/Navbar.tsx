@@ -13,11 +13,18 @@ export default function Navbar() {
         <Link href="/">MARZ</Link>
       </h1>
       <div className="space-x-4">
-        <Link className={pathname === "/" ? "text-blue-600" : ""} href="/">Home</Link>
+        <Link className={pathname === "/" ? "text-blue-600" : ""} href="/">
+          Home
+        </Link>
         {session ? (
-          <button onClick={() => signOut()} className="text-red-500">Logout</button>
+          <button onClick={() => signOut()}>Logout</button>
         ) : (
-          <Link className={pathname === "/login" ? "text-blue-600" : ""} href="/login">Login</Link>
+          <Link
+            className={pathname === "/login" ? "text-blue-600" : ""}
+            href="/login"
+          >
+            Login
+          </Link>
         )}
       </div>
     </nav>
