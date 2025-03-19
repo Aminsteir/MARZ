@@ -16,18 +16,7 @@ async function readCSV(filePath: string) {
     const results: any[] = [];
     fs.createReadStream(filePath)
       .pipe(csvParser())
-      .on("data", (data) => {
-        if (Object.keys(data)[0].includes("")) {
-          const fixedData: any = {};
-          for (const key of Object.keys(data)) {
-            const cleanKey = key.replace(/\uFEFF/g, ""); // Remove BOM
-            fixedData[cleanKey] = data[key];
-          }
-          results.push(fixedData);
-        } else {
-          results.push(data);
-        }
-      })
+      .on("data", (data) => results.push(data))
       .on("end", () => resolve(results))
       .on("error", (error) => reject(error));
   });
