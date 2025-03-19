@@ -22,8 +22,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "sqlite3": "^5.1.7",
-    "strip-bom-stream": "^5.0.0",
-    "ts-node": "^10.9.2"
+    "strip-bom-stream": "^5.0.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
