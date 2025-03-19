@@ -11,6 +11,12 @@ if (!fs.existsSync(dataDir)) {
 }
 
 const dbPath = path.join(dataDir, "marz.db");
+
+// Delete existing database file to reset everything
+if (fs.existsSync(dbPath)) {
+  fs.unlinkSync(dbPath);
+}
+
 const db = Database(dbPath);
 
 // Read CSV
@@ -29,7 +35,7 @@ async function readCSV(filePath: string) {
 async function createTables() {
   try {
     db.exec(`
-    CREATE TABLE IF NOT EXISTS users (
+    CREATE TABLE IF NOT EXISTS Users (
       email TEXT PRIMARY KEY,
       password TEXT NOT NULL
     )

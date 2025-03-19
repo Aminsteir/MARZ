@@ -18,7 +18,7 @@ const db = Database(dbPath);
 
 // Initialize database tables if they don't exist
 db.exec(`
-  CREATE TABLE IF NOT EXISTS users (
+  CREATE TABLE IF NOT EXISTS Users (
     email TEXT PRIMARY KEY,
     password TEXT NOT NULL
   )
