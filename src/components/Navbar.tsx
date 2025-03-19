@@ -8,7 +8,7 @@ export default function Navbar() {
   const { data: session } = useSession();
 
   return (
-    <nav className="bg-white shadow-md py-4 px-6 flex justify-between">
+    <nav className="bg-white shadow-md py-4 px-6 flex justify-between items-baseline">
       <h1 className="text-xl font-bold">
         <Link href="/">MARZ</Link>
       </h1>
@@ -17,7 +17,9 @@ export default function Navbar() {
           Home
         </Link>
         {session ? (
-          <button onClick={() => signOut()}>Logout</button>
+          <button className="cursor-pointer" onClick={() => signOut()}>
+            Logout
+          </button>
         ) : (
           <Link
             className={pathname === "/login" ? "text-blue-600" : ""}
