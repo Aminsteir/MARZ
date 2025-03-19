@@ -19,7 +19,7 @@ async function readCSV(filePath: string) {
       .on("data", (data) => {
         const cleanedData: any = {};
         for (const key in data) {
-          const cleanKey = key.replace(/^\uFEFF/, "");
+          const cleanKey = key.replace(/^\uFEFF/, ""); // BYTE ORDER MARK (BOM) CAUSING PROBLEMS
           cleanedData[cleanKey] = data[key];
         }
         results.push(cleanedData);
