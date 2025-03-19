@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+/* Custom Global Styles */
+body {
+  background-color: #f9f9f9;
+  color: #333;
+  font-family: var(--font-geist-sans);
+}
+
