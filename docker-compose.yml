@@ -1,0 +1,14 @@
+version: "3.8"
+
+services:
+  nextjs:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app # Syncs your local files with the container
+      - /app/node_modules # Prevents overwriting installed dependencies
+    environment:
+      - NODE_ENV=development
+    env_file:
+      - .env
