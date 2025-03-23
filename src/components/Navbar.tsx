@@ -1,10 +1,10 @@
 "use client";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+// import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 
 export default function Navbar() {
-  const pathname = usePathname();
+  // const pathname = usePathname();
   const { data: session } = useSession();
 
   return (
@@ -13,20 +13,13 @@ export default function Navbar() {
         <Link href="/">MARZ</Link>
       </h1>
       <div className="space-x-4">
-        <Link className={pathname === "/" ? "text-blue-600" : ""} href="/">
-          Home
-        </Link>
+        <Link href="/">Home</Link>
         {session ? (
           <button className="cursor-pointer" onClick={() => signOut()}>
             Logout
           </button>
         ) : (
-          <Link
-            className={pathname === "/login" ? "text-blue-600" : ""}
-            href="/login"
-          >
-            Login
-          </Link>
+          <Link href="/login">Login</Link>
         )}
       </div>
     </nav>
