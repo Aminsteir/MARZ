@@ -9,7 +9,7 @@ First, make sure docker is installed on your machine.
 Then, run the following command to build and start the project:
 
 ```bash
-docker-compose up --build -d
+docker compose up --build -d
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
@@ -17,7 +17,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 To stop running, run the following command:
 
 ```bash
-docker-compose down
+docker compose down
 ```
 
 ### Running Locally
