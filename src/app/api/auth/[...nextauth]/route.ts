@@ -4,7 +4,7 @@ import { validateUserCredentials } from "@/services/userService";
 
 export const authOptions: AuthOptions = {
   session: { strategy: "jwt" },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: process.env.NEXTAUTH_SECRET, // String used to hash tokens and sign cookies.
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -33,17 +33,19 @@ export const authOptions: AuthOptions = {
         return { id: user.email, email: user.email };
       },
     }),
+    // sign-in verification with email and password
+    // TODO: May want to provide the user-type (helpdesk, seller, buyer) as well for more granular access control
   ],
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.email = user.email;
+        token.email = user.email; // Set user email to the JWT token
       }
       return token;
     },
     async session({ session, token }) {
       if (token.email) {
-        session.user.email = token.email as string;
+        session.user.email = token.email as string; // Set user email to be available on the client session
       }
       return session;
     },

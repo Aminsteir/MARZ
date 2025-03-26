@@ -7,11 +7,13 @@ export interface User {
   password: string;
 }
 
+// Make sure the data directory exists
 const dataDir = path.join(process.cwd(), "data");
 if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true });
 }
 
+// Define the path to the database file, creating the database if it doesn't exist
 const dbPath = path.join(dataDir, "marz.db");
 const db = Database(dbPath);
 
@@ -23,4 +25,5 @@ db.exec(`
   )
 `);
 
+// Export the database instance so that other modules can use it
 export default db;

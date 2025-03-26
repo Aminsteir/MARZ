@@ -14,12 +14,12 @@ export default function Login() {
       email,
       password,
       redirect: false,
-    });
+    }); // Sign in with the credentials in the form using NextAuth
 
     if (result?.error) {
-      setError(result.error);
+      setError(result.error); // If there is an error, display the error message
     } else {
-      router.push("/");
+      router.push("/"); // If successful, redirect to the home page --> TODO: May want to redirect to the previous page it was on or the User Dashboard (Buyer, Seller, Helpdesk)
     }
   };
 

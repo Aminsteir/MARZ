@@ -1,12 +1,23 @@
 import db, { User } from "@/lib/db";
 import bcrypt from "bcryptjs";
 
+/*
+ * Get a user by email
+ * @param email - the email of the user
+ * @returns the user object if found, otherwise undefined
+ */
 export const getUserByEmail = (email: string): User | undefined => {
   return db.prepare("SELECT * FROM Users WHERE email = ?").get(email) as
     | User
     | undefined;
 };
 
+/*
+ * Validate user credentials
+ * @param email - the email of the user
+ * @param password - the password of the user
+ * @returns the user object if the credentials are valid, otherwise undefined
+ */
 export const validateUserCredentials = async (
   email: string,
   password: string,
