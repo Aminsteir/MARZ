@@ -17,6 +17,7 @@ const dbPath = path.join(dataDir, "marz.db");
 
 // Delete existing database file to reset everything
 if (fs.existsSync(dbPath)) {
+  console.log("Deleting current existing database for complete reset...");
   fs.unlinkSync(dbPath);
 }
 
@@ -60,7 +61,7 @@ async function createTables() {
         business_name TEXT NOT NULL,
         buyer_address_id INTEGER,
         FOREIGN KEY (email) REFERENCES Users(email),
-        FOREIGN KEY (buyer_address_id) REFERENCES Address(address_ID)
+        FOREIGN KEY (buyer_address_id) REFERENCES Address(address_id)
       );
     `);
 
@@ -73,13 +74,13 @@ async function createTables() {
         bank_account_number TEXT NOT NULL,
         balance REAL NOT NULL,
         FOREIGN KEY (email) REFERENCES Users(email),
-        FOREIGN KEY (business_address_id) REFERENCES Address(address_ID)
+        FOREIGN KEY (business_address_id) REFERENCES Address(address_id)
       );
     `);
 
     db.exec(`
       CREATE TABLE IF NOT EXISTS Address (
-        address_ID INTEGER PRIMARY KEY,
+        address_id INTEGER PRIMARY KEY,
         zipcode TEXT NOT NULL,
         street_num TEXT NOT NULL,
         street_name TEXT NOT NULL,
