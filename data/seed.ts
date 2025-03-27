@@ -83,7 +83,7 @@ async function createTables() {
         zipcode TEXT NOT NULL,
         street_num TEXT NOT NULL,
         street_name TEXT NOT NULL,
-        FOREIGN KEY (zipcode) REFERENCES Zipcode_Info(zipcode),
+        FOREIGN KEY (zipcode) REFERENCES Zipcode_Info(zipcode)
       );
     `);
 
@@ -238,12 +238,12 @@ async function seedDatabase() {
   try {
     console.log("Seeding database...");
 
-    seedUserTable();
-    seedHelpdeskTable();
-    seedBuyerTable();
-    seedSellersTable();
-    seedAddressTable();
-    seedZipcodeTable();
+    await seedUserTable();
+    await seedHelpdeskTable();
+    await seedBuyerTable();
+    await seedSellersTable();
+    await seedAddressTable();
+    await seedZipcodeTable();
 
     console.log("Database successfully seeded.");
   } catch (error) {
