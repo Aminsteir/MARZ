@@ -59,7 +59,7 @@ async function createTables() {
       CREATE TABLE IF NOT EXISTS Buyer (
         email TEXT PRIMARY KEY,
         business_name TEXT NOT NULL,
-        buyer_address_id INTEGER,
+        buyer_address_id TEXT,
         FOREIGN KEY (email) REFERENCES Users(email),
         FOREIGN KEY (buyer_address_id) REFERENCES Address(address_id)
       );
@@ -69,7 +69,7 @@ async function createTables() {
       CREATE TABLE IF NOT EXISTS Sellers (
         email TEXT PRIMARY KEY,
         business_name TEXT NOT NULL,
-        business_address_id INTEGER,
+        business_address_id TEXT,
         bank_routing_number TEXT NOT NULL,
         bank_account_number TEXT NOT NULL,
         balance REAL NOT NULL,
@@ -80,7 +80,7 @@ async function createTables() {
 
     db.exec(`
       CREATE TABLE IF NOT EXISTS Address (
-        address_id INTEGER PRIMARY KEY,
+        address_id TEXT PRIMARY KEY,
         zipcode TEXT NOT NULL,
         street_num TEXT NOT NULL,
         street_name TEXT NOT NULL,
@@ -239,12 +239,14 @@ async function seedDatabase() {
   try {
     console.log("Seeding database...");
 
+    await seedZipcodeTable();
+    await seedAddressTable();
+
     await seedUserTable();
+
     await seedHelpdeskTable();
     await seedBuyerTable();
     await seedSellersTable();
-    await seedAddressTable();
-    await seedZipcodeTable();
 
     console.log("Database successfully seeded.");
   } catch (error) {
