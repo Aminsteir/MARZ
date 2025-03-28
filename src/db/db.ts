@@ -11,7 +11,7 @@ if (!fs.existsSync(dataDir)) {
 // Define the path to the database file, creating the database if it doesn't exist
 const dbPath = path.join(dataDir, "marz.db");
 const db = Database(dbPath);
-db.pragma("foreign_keys = ON"); // Enable foreign key constraints
+db.pragma("foreign_keys = ON"); // Enable forcing of foreign key constraints
 
 // Assuming all tables are created in seed.ts, otherwise we can create them here:
 // e.g.,

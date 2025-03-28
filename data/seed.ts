@@ -23,7 +23,9 @@ if (fs.existsSync(dbPath)) {
 
 // Init a new SQLite3 Database instance
 const db = Database(dbPath);
-db.pragma("foreign_keys = ON"); // Enable foreign key constraints
+
+// For seeding, foreign key constraints are not enforced (child may be inserted before parent)
+db.pragma("foreign_keys = OFF");
 
 /* Read CSV */
 async function readCSV(filePath: string) {
@@ -96,8 +98,83 @@ async function createTables() {
         FOREIGN KEY (business_address_id) REFERENCES Address(address_id)
       );
     `);
+
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS Requests (
+        request_id INTEGER PRIMARY KEY,
+        sender_email TEXT NOT NULL,
+        helpdesk_staff_email TEXT NOT NULL,
+        request_type TEXT NOT NULL,
+        request_desc TEXT NOT NULL,
+        request_status INTEGER NOT NULL,
+        FOREIGN KEY (sender_email) REFERENCES Users(email),
+        FOREIGN KEY (helpdesk_staff_email) REFERENCES Helpdesk(email)
+      );
+    `);
+
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS Credit_Cards (
+        credit_card_num TEXT PRIMARY KEY,
+        card_type TEXT NOT NULL,
+        expire_month INTEGER NOT NULL,
+        expire_year INTEGER NOT NULL,
+        security_code INTEGER NOT NULL,
+        owner_email TEXT NOT NULL,
+        FOREIGN KEY (owner_email) REFERENCES Buyer(email)
+      );
+    `);
+
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS Categories (
+        category_name TEXT PRIMARY KEY,
+        parent_category TEXT,
+        FOREIGN KEY (parent_category) REFERENCES Categories(category_name)
+      );
+    `);
+
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS Product_Listings (
+        seller_email TEXT NOT NULL,
+        listing_id INTEGER NOT NULL,
+        category TEXT NOT NULL,
+        product_title TEXT NOT NULL,
+        product_name TEXT NOT NULL,
+        product_description TEXT NOT NULL,
+        quantity INTEGER NOT NULL,
+        product_price REAL NOT NULL,
+        status INTEGER NOT NULL,
+        PRIMARY KEY (seller_email, listing_id),
+        FOREIGN KEY (seller_email) REFERENCES Sellers(email),
+        FOREIGN KEY (category) REFERENCES Categories(category_name)
+      );
+    `);
+
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS Orders (
+        order_id INTEGER PRIMARY KEY,
+        seller_email TEXT NOT NULL,
+        listing_id INTEGER NOT NULL,
+        buyer_email TEXT NOT NULL,
+        date TEXT NOT NULL,
+        quantity INTEGER NOT NULL,
+        payment REAL NOT NULL,
+        FOREIGN KEY (seller_email, listing_id) REFERENCES Product_Listings(seller_email, listing_id),
+        FOREIGN KEY (buyer_email) REFERENCES Buyer(email)
+      );
+    `);
+
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS Reviews (
+        order_id INTEGER PRIMARY KEY,
+        review_desc TEXT NOT NULL,
+        rating INTEGER NOT NULL,
+        FOREIGN KEY (order_id) REFERENCES Orders(order_id)
+      );
+    `);
   } catch (error) {
     console.error("Error:", error);
+  } finally {
+    console.log("Tables created successfully.");
   }
 }
 
@@ -235,19 +312,176 @@ async function seedZipcodeTable() {
   insertMany(zipcodeData);
 }
 
-/* Seeds database w/ initial usr data from csv file */
+async function seedRequestsTable() {
+  const requestsData = await readCSV(
+    path.join(dataDir, "seeding", "Requests.csv"),
+  );
+
+  console.log("Inserting Request Records...");
+
+  const insertRequest = db.prepare(
+    "INSERT INTO Requests (request_id, sender_email, helpdesk_staff_email, request_type, request_desc, request_status) VALUES (?, ?, ?, ?, ?, ?)",
+  );
+
+  const insertMany = db.transaction((requests) => {
+    for (const request of requests) {
+      insertRequest.run(
+        request.request_id,
+        request.sender_email,
+        request.helpdesk_staff_email,
+        request.request_type,
+        request.request_desc,
+        request.request_status,
+      );
+    }
+  });
+
+  insertMany(requestsData);
+}
+
+async function seedCreditCardsTable() {
+  const creditCardsData = await readCSV(
+    path.join(dataDir, "seeding", "Credit_Cards.csv"),
+  );
+
+  console.log("Inserting Credit Card Records...");
+
+  const insertCreditCard = db.prepare(
+    "INSERT INTO Credit_Cards (credit_card_num, card_type, expire_month, expire_year, security_code, owner_email) VALUES (?, ?, ?, ?, ?, ?)",
+  );
+
+  const insertMany = db.transaction((creditCards) => {
+    for (const creditCard of creditCards) {
+      insertCreditCard.run(
+        creditCard.credit_card_num,
+        creditCard.card_type,
+        creditCard.expire_month,
+        creditCard.expire_year,
+        creditCard.security_code,
+        creditCard.owner_email,
+      );
+    }
+  });
+
+  insertMany(creditCardsData);
+}
+
+async function seedCategoriesTable() {
+  const categoriesData = await readCSV(
+    path.join(dataDir, "seeding", "Categories.csv"),
+  );
+
+  console.log("Inserting Category Records...");
+
+  const insertCategory = db.prepare(
+    "INSERT INTO Categories (category_name, parent_category) VALUES (?, ?)",
+  );
+
+  const insertMany = db.transaction((categories) => {
+    for (const category of categories) {
+      insertCategory.run(category.category_name, category.parent_category);
+    }
+  });
+
+  insertMany(categoriesData);
+}
+
+async function seedProductListingsTable() {
+  const productListingData = await readCSV(
+    path.join(dataDir, "seeding", "Product_Listings.csv"),
+  );
+
+  console.log("Inserting Product Listing Records...");
+
+  const insertProductListing = db.prepare(
+    "INSERT INTO Product_Listings (seller_email, listing_id, category, product_title, product_name, product_description, quantity, product_price, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+  );
+
+  const insertMany = db.transaction((productListings) => {
+    for (const productListing of productListings) {
+      insertProductListing.run(
+        productListing.seller_email,
+        productListing.listing_id,
+        productListing.category,
+        productListing.product_title,
+        productListing.product_name,
+        productListing.product_description,
+        productListing.quantity,
+        productListing.product_price,
+        productListing.status,
+      );
+    }
+  });
+
+  insertMany(productListingData);
+}
+
+async function seedOrdersTable() {
+  const ordersData = await readCSV(path.join(dataDir, "seeding", "Orders.csv"));
+
+  console.log("Inserting Orders Records...");
+
+  const insertOrder = db.prepare(
+    "INSERT INTO Orders (order_id, seller_email, listing_id, buyer_email, date, quantity, payment) VALUES (?, ?, ?, ?, ?, ?, ?)",
+  );
+
+  const insertMany = db.transaction((orders) => {
+    for (const order of orders) {
+      insertOrder.run(
+        order.order_id,
+        order.seller_email,
+        order.listing_id,
+        order.buyer_email,
+        order.date,
+        order.quantity,
+        order.payment,
+      );
+    }
+  });
+
+  insertMany(ordersData);
+}
+
+async function seedReviewsTable() {
+  const reviewsData = await readCSV(
+    path.join(dataDir, "seeding", "Reviews.csv"),
+  );
+
+  console.log("Inserting Reviews Records...");
+
+  const insertReview = db.prepare(
+    "INSERT INTO Reviews (order_id, review_desc, rating) VALUES (?, ?, ?)",
+  );
+
+  const insertMany = db.transaction((reviews) => {
+    for (const review of reviews) {
+      insertReview.run(review.order_id, review.review_desc, review.rating);
+    }
+  });
+
+  insertMany(reviewsData);
+}
+
+/* Seeds database data from the provided csv files */
 async function seedDatabase() {
   try {
     console.log("Seeding database...");
 
+    await seedUserTable(); // takes the most time due to hashing for each user
+
     await seedZipcodeTable();
     await seedAddressTable();
-
-    await seedUserTable();
 
     await seedHelpdeskTable();
     await seedBuyerTable();
     await seedSellersTable();
+
+    await seedRequestsTable();
+    await seedCreditCardsTable();
+    await seedCategoriesTable();
+    await seedProductListingsTable();
+    await seedOrdersTable();
+    await seedReviewsTable();
 
     console.log("Database successfully seeded.");
   } catch (error) {
