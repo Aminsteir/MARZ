@@ -23,6 +23,7 @@ if (fs.existsSync(dbPath)) {
 
 // Init a new SQLite3 Database instance
 const db = Database(dbPath);
+db.pragma("foreign_keys = ON"); // Enable foreign key constraints
 
 /* Read CSV */
 async function readCSV(filePath: string) {
@@ -48,37 +49,6 @@ async function createTables() {
     `);
 
     db.exec(`
-      CREATE TABLE IF NOT EXISTS Helpdesk (
-        email TEXT PRIMARY KEY,
-        position TEXT NOT NULL,
-        FOREIGN KEY (email) REFERENCES Users(email)
-      );
-    `);
-
-    db.exec(`
-      CREATE TABLE IF NOT EXISTS Buyer (
-        email TEXT PRIMARY KEY,
-        business_name TEXT NOT NULL,
-        buyer_address_id TEXT,
-        FOREIGN KEY (email) REFERENCES Users(email),
-        FOREIGN KEY (buyer_address_id) REFERENCES Address(address_id)
-      );
-    `);
-
-    db.exec(`
-      CREATE TABLE IF NOT EXISTS Sellers (
-        email TEXT PRIMARY KEY,
-        business_name TEXT NOT NULL,
-        business_address_id TEXT,
-        bank_routing_number TEXT NOT NULL,
-        bank_account_number TEXT NOT NULL,
-        balance REAL NOT NULL,
-        FOREIGN KEY (email) REFERENCES Users(email),
-        FOREIGN KEY (business_address_id) REFERENCES Address(address_id)
-      );
-    `);
-
-    db.exec(`
       CREATE TABLE IF NOT EXISTS Address (
         address_id TEXT PRIMARY KEY,
         zipcode TEXT NOT NULL,
@@ -93,6 +63,37 @@ async function createTables() {
         zipcode TEXT PRIMARY KEY,
         city TEXT NOT NULL,
         state TEXT NOT NULL
+      );
+    `);
+
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS Helpdesk (
+        email TEXT PRIMARY KEY,
+        position TEXT NOT NULL,
+        FOREIGN KEY (email) REFERENCES Users(email)
+      );
+    `);
+
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS Buyer (
+        email TEXT PRIMARY KEY,
+        business_name TEXT NOT NULL,
+        buyer_address_id TEXT NOT NULL,
+        FOREIGN KEY (email) REFERENCES Users(email),
+        FOREIGN KEY (buyer_address_id) REFERENCES Address(address_id)
+      );
+    `);
+
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS Sellers (
+        email TEXT PRIMARY KEY,
+        business_name TEXT NOT NULL,
+        business_address_id TEXT NOT NULL,
+        bank_routing_number TEXT NOT NULL,
+        bank_account_number TEXT NOT NULL,
+        balance REAL NOT NULL,
+        FOREIGN KEY (email) REFERENCES Users(email),
+        FOREIGN KEY (business_address_id) REFERENCES Address(address_id)
       );
     `);
   } catch (error) {
@@ -203,7 +204,7 @@ async function seedAddressTable() {
   const insertMany = db.transaction((addresses) => {
     for (const address of addresses) {
       insertAddress.run(
-        address.address_ID,
+        address.address_id,
         address.zipcode,
         address.street_num,
         address.street_name,
@@ -254,5 +255,7 @@ async function seedDatabase() {
   }
 }
 
-createTables(); // Create tables
-seedDatabase(); // Run seeding function
+(async () => {
+  await createTables(); // Create db tables
+  await seedDatabase(); // Seed db with initial data
+})();
