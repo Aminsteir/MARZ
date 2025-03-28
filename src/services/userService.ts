@@ -1,4 +1,5 @@
-import db, { User } from "@/lib/db";
+import db from "@/db/db";
+import { User } from "@/db/models";
 import bcrypt from "bcryptjs";
 
 /*

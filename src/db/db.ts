@@ -2,11 +2,6 @@ import Database from "better-sqlite3";
 import path from "path";
 import fs from "fs";
 
-export interface User {
-  email: string;
-  password: string;
-}
-
 // Make sure the data directory exists
 const dataDir = path.join(process.cwd(), "data");
 if (!fs.existsSync(dataDir)) {
