@@ -9,6 +9,7 @@ export default function Login() {
   const [error, setError] = useState("");
   const router = useRouter();
 
+  // Process to handle if login button was clicked
   const handleLogin = async () => {
     const result = await signIn("credentials", {
       email,
@@ -23,6 +24,7 @@ export default function Login() {
     }
   };
 
+  // Main page
   return (
     <div className="flex flex-col w-full justify-center items-center">
       {error && (
@@ -33,7 +35,7 @@ export default function Login() {
           <strong className="font-bold">Login Error</strong>
           <span className="block sm:inline">{error}</span>
         </div>
-      )}
+      )} 
       <div className="w-md p-10 mt-10 bg-white shadow-md rounded flex flex-col gap-4">
         <h1 className="text-2xl font-bold">Login</h1>
         <input
@@ -50,11 +52,14 @@ export default function Login() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-        <button
+        <button 
           onClick={handleLogin}
           className="bg-blue-500 text-white px-4 py-2 rounded cursor-pointer"
         >
           Log In
+        </button>
+        <button onClick={() => router.push("/register")} className="bg-gray-500 text-white px-4 py-2 rounded cursor-pointer mt-2">
+          Create Account
         </button>
       </div>
     </div>
