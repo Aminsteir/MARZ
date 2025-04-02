@@ -25,8 +25,8 @@ export default function Login() {
   };
 
   // Main page
-  return (
-    <div className="flex flex-col w-full justify-center items-center">
+  return ( 
+    <div className="flex flex-col w-full justify-center items-center"> 
       {error && (
         <div
           className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative w-md flex flex-row gap-4 mt-10"
