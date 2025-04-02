@@ -61,34 +61,5 @@ export const authOptions: AuthOptions = {
   },
 };
 
-// Define API handler for authentication and user registration
-// const handler = NextAuth(authOptions);
-const handler = async (req, res) => {
-  if (req.method === "POST" && req.url === "/api/auth/register") {
-    try {
-      // Parse request body
-      const { email, password, role } = await req.json();
-      
-      // Validate input fields
-      if (!email || !password || !role) {
-        return res.status(400).json({ message: "All fields are required" });
-      }
-
-      // Register a new user in the database
-      const newUser = await registerUser(email, password, role);
-      if (!newUser) {
-        return res.status(400).json({ message: "User already exists" });
-      }
-
-      return res.status(201).json({ message: "User registered successfully" });
-    } catch (error) {
-      return res.status(500).json({ message: "Internal Server Error" });
-    }
-  }
-  
-  // Handle authentication requests with NextAuth
-  return NextAuth(authOptions)(req, res);
-};
-
+const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };
-

@@ -40,33 +40,8 @@ export const validateUserCredentials = async (
 
 /*
  * Register a new user
- * @param email - the email of the user
- * @param password - the password of the user
- * @param role - the role of the user (Buyer, Seller, HelpDesk)
- * @returns the newly created user object if successful, otherwise null
  */
-export const registerUser = async (
-  email: string,
-  password: string,
-  role: string
-): Promise<User | null> => {
-  // Check if user already exists
-  if (getUserByEmail(email)) {
-    return null; // User already exists
-  }
-
-  // Hash the password
-  const hashedPassword = await bcrypt.hash(password, 10);
-
-  // Insert the new user into the database
-  const stmt = db.prepare(
-    "INSERT INTO Users (email, password, role) VALUES (?, ?, ?)"
-  );
-  const result = stmt.run(email, hashedPassword, role);
-
-  if (result.changes === 1) {
-    return getUserByEmail(email); // Return the newly created user
-  }
-
+export const registerUser = async (): Promise<User | null> => {
+  // TODO: Implement registering the user
   return null;
 };
