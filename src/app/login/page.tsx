@@ -7,10 +7,13 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [tries, setTries] = useState(0); // Track the number of login attempts
   const router = useRouter();
 
   // Process to handle if login button was clicked
-  const handleLogin = async () => {
+  const handleLogin = async (event: Event) => {
+    event.preventDefault();
+
     const result = await signIn("credentials", {
       email,
       password,
@@ -19,6 +22,7 @@ export default function Login() {
 
     if (result?.error) {
       setError(result.error); // If there is an error, display the error message
+      setTries((prev) => prev + 1); // Increment the number of tries
     } else {
       router.push("/"); // If successful, redirect to the home page --> TODO: May want to redirect to the previous page it was on or the User Dashboard (Buyer, Seller, Helpdesk)
     }
@@ -42,7 +46,10 @@ export default function Login() {
           <span className="block sm:inline">{error}</span>
         </div>
       )}
-      <div className="w-md p-10 mt-10 bg-white shadow-md rounded flex flex-col gap-4">
+      <form
+        className="w-md p-10 mt-10 bg-white shadow-md rounded flex flex-col gap-4"
+        onSubmit={handleLogin}
+      >
         <h1 className="text-2xl font-bold">Login</h1>
         <input
           type="email"
@@ -61,24 +68,34 @@ export default function Login() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-        <button
-          onClick={handleLogin}
-          disabled={!isValid}
-          className={`px-4 py-2 rounded ${
-            isValid
-              ? "cursor-pointer bg-blue-500 text-white"
-              : "bg-gray-300 text-gray-600 cursor-not-allowed"
-          }`}
-        >
-          Log In
-        </button>
-        <button
-          onClick={() => router.push("/register")}
-          className="bg-gray-500 text-white px-4 py-2 rounded cursor-pointer mt-2"
-        >
-          Create Account
-        </button>
-      </div>
+        <div className="flex flex-row w-full gap-6">
+          <button
+            type="submit"
+            disabled={!isValid}
+            className={`px-4 py-2 rounded flex-1 ${
+              isValid
+                ? "cursor-pointer bg-blue-500 text-white"
+                : "bg-gray-300 text-gray-600 cursor-not-allowed"
+            }`}
+          >
+            Log In
+          </button>
+          <button
+            onClick={() => router.push("/register")}
+            className="bg-gray-500 text-white px-4 py-2 rounded cursor-pointer flex-1"
+          >
+            Create Account
+          </button>
+        </div>
+        {tries > 0 && (
+          <button
+            onClick={() => router.push("/forgot-password")}
+            className="bg-red-400 text-white font-bold px-4 py-2 rounded cursor-pointer mt-2"
+          >
+            Forgot Password?
+          </button>
+        )}
+      </form>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import NextAuth, { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { validateUserCredentials, registerUser } from "@/services/userService";
+import { validateUserCredentials, getUserRole } from "@/services/userService";
 
 // Defining authentication options for NextAuth
 export const authOptions: AuthOptions = {
@@ -31,8 +31,12 @@ export const authOptions: AuthOptions = {
         if (!user) {
           throw new Error("Invalid Email or Password");
         }
+
+        // Get user role (Seller, Helpdesk, Buyer)
+        const userRole = await getUserRole(user.email);
+
         // Return user data if the authetication is successful
-        return { id: user.email, email: user.email }; // role: user.role
+        return { id: user.email, email: user.email, role: userRole };
       },
     }),
     // sign-in verification with email and password
@@ -43,7 +47,7 @@ export const authOptions: AuthOptions = {
       // Attach user email and role to JWT token
       if (user) {
         token.email = user.email;
-        // token.role = user.role;
+        token.role = user.role;
       }
       return token;
     },
@@ -51,7 +55,7 @@ export const authOptions: AuthOptions = {
       if (token.email) {
         // Attach user email and role to session
         session.user.email = token.email as string;
-        // session.user.role = token.role;
+        session.user.role = token.role;
       }
       return session;
     },
