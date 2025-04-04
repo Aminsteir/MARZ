@@ -18,13 +18,13 @@ export default function Home() {
   /* Home Page contents */
   return (
     <div className="flex flex-col items-center justify-center p-4">
-      <div className="relative w-full max-w-2xl flex justify-center">
+      <div className="relative w-full max-w-2xl flex justify-center mt-4">
         <Image
           src="/marz-logo.jpg"
           alt="MARZ Logo"
           width={400} // Adjust width to fit layout
           height={200} // Adjust height to fit layout
-          className="rounded-lg shadow-lg object-contain" // Responsive styling
+          className="rounded-lg shadow-2xl object-contain" // Responsive styling
           priority // Ensures the image loads fast
         />
       </div>
