@@ -81,6 +81,7 @@ export default function Login() {
             Log In
           </button>
           <button
+            type="button"
             onClick={() => router.push("/register")}
             className="bg-gray-500 text-white px-4 py-2 rounded cursor-pointer flex-1"
           >
@@ -89,6 +90,7 @@ export default function Login() {
         </div>
         {tries > 0 && (
           <button
+            type="submit"
             onClick={() => router.push("/forgot-password")}
             className="bg-red-400 text-white font-bold px-4 py-2 rounded cursor-pointer mt-2"
           >
