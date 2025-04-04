@@ -11,7 +11,7 @@ export default function Login() {
   const router = useRouter();
 
   // Process to handle if login button was clicked
-  const handleLogin = async (event: Event) => {
+  const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const result = await signIn("credentials", {
