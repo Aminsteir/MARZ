@@ -33,6 +33,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/sqlite3": "^5.1.0",
+    "@types/uuid": "^10.0.0",
     "eslint": "^9",
     "eslint-config-next": "15.2.3",
     "prisma": "^6.5.0",

@@ -86,3 +86,5 @@ export interface Review {
   rating: number;
   review_desc: string;
 }
+
+export type UserRole = "Helpdesk" | "Buyer" | "Seller" | null;

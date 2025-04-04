@@ -1,5 +1,5 @@
 import db from "@/db/db";
-import { Address, User, ZipcodeInfo } from "@/db/models";
+import { Address, User, ZipcodeInfo, UserRole } from "@/db/models";
 import bcrypt from "bcryptjs";
 import { v4 } from "uuid";
 
@@ -151,7 +151,7 @@ export const registerUser = async (userInfo: any): Promise<User | null> => {
   return user;
 };
 
-export const getUserRole = async (email: string): Promise<string | null> => {
+export const getUserRole = async (email: string): Promise<UserRole> => {
   const helpdesk = db
     .prepare("SELECT * FROM Helpdesk WHERE email = ?")
     .get(email);
