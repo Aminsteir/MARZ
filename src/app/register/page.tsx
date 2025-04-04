@@ -19,10 +19,8 @@ export default function Register() {
   const [stateVal, setStateVal] = useState("");
   const [streetNum, setStreetNum] = useState("");
   const [streetName, setStreetName] = useState("");
-  const [position, setPosition] = useState("");
   const [bankRouting, setBankRouting] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
-  const [balance, setBalance] = useState("");
 
   const router = useRouter();
 
@@ -44,15 +42,11 @@ export default function Register() {
           business_name: businessName.trim(),
           address,
         }),
-        ...(role === "HelpDesk" && {
-          position: position.trim(),
-        }),
         ...(role === "Seller" && {
           business_name: businessName.trim(),
           business_address: address,
           bank_routing_number: bankRouting.trim(),
           account_number: accountNumber.trim(),
-          balance: balance.trim(),
         }),
       };
 
@@ -90,9 +84,6 @@ export default function Register() {
         streetName.trim()
       );
     }
-    if (role === "HelpDesk") {
-      return position.trim();
-    }
     if (role === "Seller") {
       return (
         businessName.trim() &&
@@ -102,8 +93,7 @@ export default function Register() {
         streetNum.trim() &&
         streetName.trim() &&
         bankRouting.trim() &&
-        accountNumber.trim() &&
-        balance.toString().trim()
+        accountNumber.trim()
       );
     }
     return true;
@@ -157,7 +147,6 @@ export default function Register() {
             >
               <option value="Buyer">Buyer</option>
               <option value="Seller">Seller</option>
-              <option value="HelpDesk">HelpDesk</option>
             </select>
             <button
               onClick={() => setStep(2)}
@@ -222,16 +211,6 @@ export default function Register() {
               </>
             )}
 
-            {role === "HelpDesk" && (
-              <input
-                type="text"
-                placeholder="Position"
-                className="w-full p-2 border rounded mb-2"
-                value={position}
-                onChange={(e) => setPosition(e.target.value)}
-              />
-            )}
-
             {role === "Seller" && (
               <>
                 <input
@@ -247,13 +226,6 @@ export default function Register() {
                   className="w-full p-2 border rounded mb-2"
                   value={accountNumber}
                   onChange={(e) => setAccountNumber(e.target.value)}
-                />
-                <input
-                  type="number"
-                  placeholder="Balance"
-                  className="w-full p-2 border rounded mb-2"
-                  value={balance}
-                  onChange={(e) => setBalance(e.target.value)}
                 />
               </>
             )}

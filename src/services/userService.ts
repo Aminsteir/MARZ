@@ -144,7 +144,7 @@ export const registerUser = async (userInfo: any): Promise<User | null> => {
       address.address_id,
       additionalInfo.bank_routing_number,
       additionalInfo.account_number,
-      additionalInfo.balance,
+      0,
     );
   }
 
