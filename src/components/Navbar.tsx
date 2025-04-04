@@ -8,10 +8,10 @@ export default function Navbar() {
   return (
     <nav className="bg-white shadow-md py-4 px-6 flex justify-between items-baseline">
       <h1 className="text-xl font-bold">
-        <Link href="/">MARZ</Link>
+        <Link href={session ? "/dashboard" : "/"}>MARZ</Link>
       </h1>
       <div className="space-x-4">
-        <Link href="/">Home</Link>
+        <Link href={session ? "/dashboard" : "/"}>Home</Link>
         {session ? (
           <button className="cursor-pointer" onClick={() => signOut()}>
             Logout

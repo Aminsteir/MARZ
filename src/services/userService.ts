@@ -43,7 +43,7 @@ export const validateUserCredentials = async (
  * Register a new user
  */
 export const registerUser = async (userInfo: any): Promise<User | null> => {
-  const { email, password, role, additionalInfo } = userInfo;
+  const { email, password, role, ...additionalInfo } = userInfo;
 
   const existingUser = getUserByEmail(email);
   if (existingUser) {
@@ -65,25 +65,27 @@ export const registerUser = async (userInfo: any): Promise<User | null> => {
 
   // Insert additional information based on the role
   if (role === "Buyer") {
-    const { business_name, addressRaw } = additionalInfo;
-    const { zipcode, city, state, street_num, street_name } = addressRaw;
-
     const zipInfo: ZipcodeInfo = {
-      zipcode,
-      city,
-      state,
+      zipcode: additionalInfo.address.zipcode,
+      city: additionalInfo.address.city,
+      state: additionalInfo.address.state,
     };
 
     const address: Address = {
       address_id: v4(),
-      zipcode,
-      street_num,
-      street_name,
+      zipcode: zipInfo.zipcode,
+      street_num: additionalInfo.address.street_num,
+      street_name: additionalInfo.address.street_name,
     };
 
-    db.prepare(
-      "INSERT INTO Zipcode_Info (zipcode, city, state) VALUES (?, ?, ?)",
-    ).run(zipInfo.zipcode, zipInfo.city, zipInfo.state);
+    const retrievedZip = db
+      .prepare("SELECT zipcode FROM Zipcode_Info WHERE zipcode = ?")
+      .get(zipInfo.zipcode);
+    if (!retrievedZip) {
+      db.prepare(
+        "INSERT INTO Zipcode_Info (zipcode, city, state) VALUES (?, ?, ?)",
+      ).run(zipInfo.zipcode, zipInfo.city, zipInfo.state);
+    }
 
     db.prepare(
       "INSERT INTO Address (address_id, zipcode, street_num, street_name) VALUES (?, ?, ?, ?)",
@@ -96,40 +98,34 @@ export const registerUser = async (userInfo: any): Promise<User | null> => {
 
     db.prepare(
       "INSERT INTO Buyer (email, business_name, buyer_address_id) VALUES (?, ?, ?)",
-    ).run(email, business_name, address.address_id);
+    ).run(email, additionalInfo.business_name, address.address_id);
   } else if (role === "HelpDesk") {
-    const { position } = additionalInfo;
-
     db.prepare("INSERT INTO Helpdesk (email, position) VALUES (?, ?)").run(
       email,
-      position,
+      additionalInfo.position,
     );
   } else if (role === "Seller") {
-    const {
-      business_name,
-      business_address,
-      bank_routing_number,
-      account_number,
-      balance,
-    } = additionalInfo;
-    const { zipcode, city, state, street_num, street_name } = business_address;
-
     const zipInfo: ZipcodeInfo = {
-      zipcode,
-      city,
-      state,
+      zipcode: additionalInfo.business_address.zipcode,
+      city: additionalInfo.business_address.city,
+      state: additionalInfo.business_address.state,
     };
 
     const address: Address = {
       address_id: v4(),
-      zipcode,
-      street_num,
-      street_name,
+      zipcode: zipInfo.zipcode,
+      street_num: additionalInfo.business_address.street_num,
+      street_name: additionalInfo.business_address.street_name,
     };
 
-    db.prepare(
-      "INSERT INTO Zipcode_Info (zipcode, city, state) VALUES (?, ?, ?)",
-    ).run(zipInfo.zipcode, zipInfo.city, zipInfo.state);
+    const retrievedZip = db
+      .prepare("SELECT zipcode FROM Zipcode_Info WHERE zipcode = ?")
+      .get(zipInfo.zipcode);
+    if (!retrievedZip) {
+      db.prepare(
+        "INSERT INTO Zipcode_Info (zipcode, city, state) VALUES (?, ?, ?)",
+      ).run(zipInfo.zipcode, zipInfo.city, zipInfo.state);
+    }
 
     db.prepare(
       "INSERT INTO Address (address_id, zipcode, street_num, street_name) VALUES (?, ?, ?, ?)",
@@ -144,11 +140,11 @@ export const registerUser = async (userInfo: any): Promise<User | null> => {
       "INSERT INTO Sellers (email, business_name, business_address_id, bank_routing_number, bank_account_number, balance) VALUES (?, ?, ?, ?, ?, ?)",
     ).run(
       email,
-      business_name,
+      additionalInfo.business_name,
       address.address_id,
-      bank_routing_number,
-      account_number,
-      balance,
+      additionalInfo.bank_routing_number,
+      additionalInfo.account_number,
+      additionalInfo.balance,
     );
   }
 

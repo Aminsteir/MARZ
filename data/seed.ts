@@ -56,7 +56,7 @@ async function createTables() {
         zipcode TEXT NOT NULL,
         street_num TEXT NOT NULL,
         street_name TEXT NOT NULL,
-        FOREIGN KEY (zipcode) REFERENCES Zipcode_Info(zipcode)
+        FOREIGN KEY (zipcode) REFERENCES Zipcode_Info(zipcode) ON DELETE NO ACTION ON UPDATE NO ACTION
       );
     `);
 
@@ -72,7 +72,7 @@ async function createTables() {
       CREATE TABLE IF NOT EXISTS Helpdesk (
         email TEXT PRIMARY KEY,
         position TEXT NOT NULL,
-        FOREIGN KEY (email) REFERENCES Users(email)
+        FOREIGN KEY (email) REFERENCES Users(email) ON DELETE CASCADE ON UPDATE CASCADE
       );
     `);
 
@@ -81,8 +81,8 @@ async function createTables() {
         email TEXT PRIMARY KEY,
         business_name TEXT NOT NULL,
         buyer_address_id TEXT NOT NULL,
-        FOREIGN KEY (email) REFERENCES Users(email),
-        FOREIGN KEY (buyer_address_id) REFERENCES Address(address_id)
+        FOREIGN KEY (email) REFERENCES Users(email) ON DELETE CASCADE,
+        FOREIGN KEY (buyer_address_id) REFERENCES Address(address_id) ON DELETE NO ACTION ON UPDATE NO ACTION
       );
     `);
 
@@ -94,8 +94,8 @@ async function createTables() {
         bank_routing_number TEXT NOT NULL,
         bank_account_number TEXT NOT NULL,
         balance REAL NOT NULL,
-        FOREIGN KEY (email) REFERENCES Users(email),
-        FOREIGN KEY (business_address_id) REFERENCES Address(address_id)
+        FOREIGN KEY (email) REFERENCES Users(email) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (business_address_id) REFERENCES Address(address_id) ON DELETE NO ACTION ON UPDATE NO ACTION
       );
     `);
 
@@ -103,12 +103,12 @@ async function createTables() {
       CREATE TABLE IF NOT EXISTS Requests (
         request_id INTEGER PRIMARY KEY,
         sender_email TEXT NOT NULL,
-        helpdesk_staff_email TEXT NOT NULL,
+        helpdesk_staff_email TEXT NOT NULL DEFAULT "helpdeskteam@nittybiz.com",
         request_type TEXT NOT NULL,
         request_desc TEXT NOT NULL,
         request_status INTEGER NOT NULL,
-        FOREIGN KEY (sender_email) REFERENCES Users(email),
-        FOREIGN KEY (helpdesk_staff_email) REFERENCES Helpdesk(email)
+        FOREIGN KEY (sender_email) REFERENCES Users(email) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (helpdesk_staff_email) REFERENCES Helpdesk(email) ON DELETE SET DEFAULT ON UPDATE CASCADE
       );
     `);
 
@@ -120,7 +120,7 @@ async function createTables() {
         expire_year INTEGER NOT NULL,
         security_code INTEGER NOT NULL,
         owner_email TEXT NOT NULL,
-        FOREIGN KEY (owner_email) REFERENCES Buyer(email)
+        FOREIGN KEY (owner_email) REFERENCES Buyer(email) ON DELETE CASCADE ON UPDATE CASCADE
       );
     `);
 
@@ -128,7 +128,7 @@ async function createTables() {
       CREATE TABLE IF NOT EXISTS Categories (
         category_name TEXT PRIMARY KEY,
         parent_category TEXT,
-        FOREIGN KEY (parent_category) REFERENCES Categories(category_name)
+        FOREIGN KEY (parent_category) REFERENCES Categories(category_name) ON DELETE CASCADE ON UPDATE CASCADE
       );
     `);
 
@@ -144,8 +144,8 @@ async function createTables() {
         product_price REAL NOT NULL,
         status INTEGER NOT NULL,
         PRIMARY KEY (seller_email, listing_id),
-        FOREIGN KEY (seller_email) REFERENCES Sellers(email),
-        FOREIGN KEY (category) REFERENCES Categories(category_name)
+        FOREIGN KEY (seller_email) REFERENCES Sellers(email) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (category) REFERENCES Categories(category_name) ON DELETE NO ACTION ON UPDATE CASCADE
       );
     `);
 
@@ -158,8 +158,8 @@ async function createTables() {
         date TEXT NOT NULL,
         quantity INTEGER NOT NULL,
         payment REAL NOT NULL,
-        FOREIGN KEY (seller_email, listing_id) REFERENCES Product_Listings(seller_email, listing_id),
-        FOREIGN KEY (buyer_email) REFERENCES Buyer(email)
+        FOREIGN KEY (seller_email, listing_id) REFERENCES Product_Listings(seller_email, listing_id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (buyer_email) REFERENCES Buyer(email) ON DELETE CASCADE ON UPDATE CASCADE
       );
     `);
 
@@ -168,7 +168,7 @@ async function createTables() {
         order_id INTEGER PRIMARY KEY,
         review_desc TEXT NOT NULL,
         rating INTEGER NOT NULL,
-        FOREIGN KEY (order_id) REFERENCES Orders(order_id)
+        FOREIGN KEY (order_id) REFERENCES Orders(order_id) ON DELETE CASCADE ON UPDATE CASCADE
       );
     `);
   } catch (error) {

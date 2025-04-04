@@ -24,7 +24,7 @@ export default function Login() {
       setError(result.error); // If there is an error, display the error message
       setTries((prev) => prev + 1); // Increment the number of tries
     } else {
-      router.push("/"); // If successful, redirect to the home page --> TODO: May want to redirect to the previous page it was on or the User Dashboard (Buyer, Seller, Helpdesk)
+      router.push("/dashboard");
     }
   };
 
