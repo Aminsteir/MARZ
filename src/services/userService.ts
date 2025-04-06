@@ -168,3 +168,67 @@ export const getUserRole = async (email: string): Promise<UserRole> => {
 
   return null;
 };
+
+export const searchCategories = async(query: string): Promise<string[]> =>{
+  const categories = db.prepare("SELECT category_name FROM Categories").all() as { category_name: string }[]
+
+  const queryWords = query.toLowerCase().trim().split(/\s+/);
+
+  const matches = categories
+    .filter((category) =>
+      queryWords.every((word) =>
+        category.category_name.toLowerCase().includes(word)
+      )
+    )
+    .map((category) => category.category_name);
+    if (matches.length < 4) {
+      const remaining = categories
+        .filter((category) => !matches.includes(category.category_name))
+        .map((category) => category.category_name)
+        .slice(0, 4 - matches.length);
+  
+      return [...matches, ...remaining];
+    }
+    return matches.slice(0, 4);
+  
+  // Old code for searching by edit distance
+  const calculateEditDistance = (a: string, b: string): number => {
+    const dp = Array.from({ length: a.length + 1 }, () => Array(b.length + 1).fill(0));
+    for (let i = 0; i <= a.length; i++) dp[i][0] = i;
+    for (let j = 0; j <= b.length; j++) dp[0][j] = j;
+    for (let i = 1; i <= a.length; i++) {
+      for (let j = 1; j <= b.length; j++) {
+        dp[i][j] =
+          a[i - 1] === b[j - 1]
+            ? dp[i - 1][j - 1]
+            : 1 + Math.min(dp[i - 1][j - 1], dp[i - 1][j], dp[i][j - 1]);
+      }
+    }
+    return dp[a.length][b.length] / (a.length + b.length);
+  };
+
+  const distances = categories.map((category) => ({
+    name: category.category_name,
+    distance: calculateEditDistance(query, category.category_name),
+  }));
+  
+
+  return distances
+    .sort((a, b) => a.distance - b.distance)
+    .slice(0, 4)
+    .map((item) => item.name);
+}
+
+export const listProduct = async(listingInfo: any) =>{
+  const title = listingInfo.title
+  db.prepare("INSERT INTO Product_Listings (seller_email, category, product_title, product_name, product_description, quantity, product_price, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)").run(
+    listingInfo.email,
+    listingInfo.category,
+    listingInfo.title,
+    listingInfo.name,
+    listingInfo.description,
+    listingInfo.quantity,
+    listingInfo.price,
+    1
+  )
+}
