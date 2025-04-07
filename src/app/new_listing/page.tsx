@@ -1,5 +1,7 @@
 "use client";
 import { useState} from "react";
+import { getSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 export default function NewListing() {
     const [title, setTitle] = useState("")
@@ -9,17 +11,59 @@ export default function NewListing() {
     const [price, setPrice] = useState("")
     const [quantity, setQuantity] = useState("")
     const [suggestions, setSuggestions] = useState<string[]>([]);
+    const [errorMessage, setErrorMessage] = useState("")
+
+    const router = useRouter();
 
     const handleListProduct = async () => {
+        if(title == ""){
+            setErrorMessage("Product listing must include a title")
+            return
+        }
+        if(name == ""){
+            setErrorMessage("Product listing must include a name")
+            return
+        }
+        if(description == ""){
+            setErrorMessage("Product listing must include a description")
+            return
+        }
+        if(category == ""){
+            setErrorMessage("Product listing must include a category")
+            return
+        }
+        if(price == ""){
+            setErrorMessage("Product listing must include a price")
+            return
+        }
+        if(quantity == ""){
+            setErrorMessage("Product listing must inclue a quantity")
+            return
+        }
+        
+        setErrorMessage("")
+        try{
+        const session = await getSession()
         const body = {
-            // TODO: Get seller email
-            email: "PLACEHOLDER",
+            email: session.user.email,
             title: title,
             name: name,
             description: description,
             category: category,
             price: price,
             quantity: quantity
+        }
+
+        const response = await fetch("/api/list_product", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+          });
+        
+        alert("Product listed successfully")
+        // router.push("/dashboard");
+        } catch (err){
+            setErrorMessage(err.message);
         }
     }
 
@@ -121,8 +165,17 @@ export default function NewListing() {
         onChange={(e) => setQuantity(e.target.value)}>
         </input>
 
+        {errorMessage && (
+        <p className="text-red-500">
+            {errorMessage}
+        </p>
+        )}
+
         <button
-        onClick={handleListProduct}
+        onClick={(e) => {
+            e.preventDefault();
+            handleListProduct();
+          }}        
         className="mt-4 px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
         >
           List Product
