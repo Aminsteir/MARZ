@@ -1,10 +1,10 @@
-import { listProduct } from "@/services/userService";
+import { listProduct } from "@/services/productService";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    
+
     await listProduct(body);
 
     return NextResponse.json(
