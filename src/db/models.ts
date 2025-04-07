@@ -61,7 +61,7 @@ export interface Category {
 
 export interface Product_Listing {
   seller_email: string;
-  listing_id: string;
+  listing_id: number;
   category: string;
   product_title: string;
   product_name: string;
