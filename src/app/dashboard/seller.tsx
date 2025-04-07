@@ -5,7 +5,7 @@ export default function SellerDash() {
   const router = useRouter();
 
   const handleNewListing = () => {
-    router.push("/new_listing");
+    router.push("/new-listing");
   };
 
   return (

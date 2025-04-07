@@ -25,45 +25,50 @@ export default function Register() {
   const router = useRouter();
 
   const handleRegister = async () => {
-    try {
-      const address = {
-        zipcode: zipcode.trim(),
-        city: city.trim(),
-        state: stateVal.trim(),
-        street_num: streetNum.trim(),
-        street_name: streetName.trim(),
-      };
+    const address = {
+      zipcode: zipcode.trim(),
+      city: city.trim(),
+      state: stateVal.trim(),
+      street_num: streetNum.trim(),
+      street_name: streetName.trim(),
+    };
 
-      const body = {
-        email: email.trim(),
-        password: password.trim(),
-        role: role.trim(),
-        ...(role === "Buyer" && {
-          business_name: businessName.trim(),
-          address,
-        }),
-        ...(role === "Seller" && {
-          business_name: businessName.trim(),
-          business_address: address,
-          bank_routing_number: bankRouting.trim(),
-          account_number: accountNumber.trim(),
-        }),
-      };
+    const body = {
+      email: email.trim(),
+      password: password.trim(),
+      role: role.trim(),
+      ...(role === "Buyer" && {
+        business_name: businessName.trim(),
+        address,
+      }),
+      ...(role === "Seller" && {
+        business_name: businessName.trim(),
+        business_address: address,
+        bank_routing_number: bankRouting.trim(),
+        account_number: accountNumber.trim(),
+      }),
+    };
 
-      const response = await fetch("/api/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Registration failed");
-
-      router.push("/login");
-    } catch (err) {
+    const response: Response | null = await fetch("/api/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }).catch((err) => {
       setError(err.message);
       setStep(1);
+      return null;
+    });
+
+    if (!response) return;
+
+    const data = await response.json();
+    if (!response.ok) {
+      setError(data.message || "Registration failed");
+      setStep(1);
+      return;
     }
+
+    router.push("/login");
   };
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
