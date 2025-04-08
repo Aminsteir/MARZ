@@ -1,24 +1,20 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import CategoryModal from "@/components/CategoryModal";
-import { UserRole } from "@/db/models";
+import { UserRole, Product_Listing } from "@/db/models";
 
-export default function NewListing() {
+export default function EditListing() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
   const { data: session } = useSession({
     required: true,
     onUnauthenticated() {
       router.push("/");
     },
   });
-
-  useEffect(() => {
-    if (session && (session.user?.role as UserRole) === "Buyer") {
-      router.push("/");
-    }
-  }, [session, router]);
 
   const [title, setTitle] = useState("");
   const [name, setName] = useState("");
@@ -28,11 +24,69 @@ export default function NewListing() {
   const [quantity, setQuantity] = useState(0);
   const [errorMessage, setErrorMessage] = useState("");
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [status, setStatus] = useState(1);
 
   const priceRef = useRef(null);
   const quantityRef = useRef(null);
 
-  const handleListProduct = async () => {
+  useEffect(() => {
+    if (session && (session.user.role as UserRole) === "Buyer") {
+      router.push("/");
+    }
+
+    const sellerEmail = searchParams.get("seller_email");
+    const listingId = searchParams.get("listing_id");
+
+    // If sellerEmail or listingId is not provided, redirect to home
+    if (!sellerEmail || !listingId) {
+      router.push("/");
+      return;
+    }
+
+    // If the user is not the owner of the listing or not a Helpdesk staff, redirect to home
+    if (
+      session &&
+      sellerEmail.trim() !== session.user.email &&
+      (session.user.role as UserRole) !== "Helpdesk"
+    ) {
+      router.push("/");
+      return;
+    }
+
+    // Fetch the product listing details via GET request
+    const fetchProductListing = async () => {
+      const response = await fetch(
+        `/api/get-product?listingId=${encodeURIComponent(listingId)}&sellerEmail=${encodeURIComponent(sellerEmail)}`,
+      );
+
+      if (!response.ok) {
+        router.push("/");
+        return;
+      }
+
+      const data = await response.json();
+      const product: Product_Listing = data.data;
+
+      setTitle(product.product_title);
+      setName(product.product_name);
+      setDescription(product.product_description);
+      setCategory(product.category);
+      setPrice(product.product_price);
+      setQuantity(product.quantity);
+      setStatus(product.status);
+    };
+    fetchProductListing();
+  }, [session, router, searchParams]);
+
+  useEffect(() => {
+    if (quantity <= 0) {
+      setStatus(2); // Force "Out of stock/Sold"
+    } else if (status === 2) {
+      setStatus(1); // Reset status to active if quantity > 0
+    }
+  }, [quantity, status]);
+
+  const editProductListing = async () => {
     if (title.trim().length == 0) {
       setErrorMessage("Product listing must include a title");
       return;
@@ -53,17 +107,19 @@ export default function NewListing() {
       return;
     }
 
-    const body = {
-      email: session.user.email,
-      title: title.trim(),
-      name: name.trim(),
-      description: description.trim(),
+    const body: Product_Listing = {
+      seller_email: session.user.email.trim(),
+      listing_id: parseInt(searchParams.get("listing_id")),
       category: category.trim(),
-      price: price,
+      product_title: title.trim(),
+      product_name: name.trim(),
+      product_description: description.trim(),
       quantity: quantity,
+      product_price: price,
+      status: status,
     };
 
-    const response = await fetch("/api/list-product", {
+    const response = await fetch("/api/edit-product", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -76,23 +132,24 @@ export default function NewListing() {
 
     const data = await response.json();
     if (!response.ok) {
-      setErrorMessage(data.message || "Product listing failed");
+      setErrorMessage(data.message || "Failed to edit product listing");
       return;
     }
 
-    alert("Product listed successfully");
+    alert("Product listing updated successfully");
     router.push("/dashboard");
   };
 
-  return (
+  return session ? (
     <div className="flex flex-col w-full justify-center items-center p-4">
-      <h1 className="text-2xl font-bold mt-6">New Product</h1>
+      <h1 className="text-2xl font-bold mt-6">Update Product</h1>
       <form className="w-md p-10 mt-10 bg-white shadow-lg rounded-2xl flex flex-col gap-4">
         {/* Title */}
         <h2 className="text-1xl font-bold">Title</h2>
         <input
           className="w-full p-2 border rounded mb-2"
           onChange={(e) => setTitle(e.target.value)}
+          defaultValue={title}
         ></input>
 
         {/* Name */}
@@ -100,6 +157,7 @@ export default function NewListing() {
         <input
           className="w-full p-2 border rounded mb-2"
           onChange={(e) => setName(e.target.value)}
+          defaultValue={name}
         ></input>
 
         {/* Description */}
@@ -107,6 +165,7 @@ export default function NewListing() {
         <input
           className="w-full p-2 border rounded mb-2"
           onChange={(e) => setDescription(e.target.value)}
+          defaultValue={description}
         ></input>
 
         {/* Category */}
@@ -138,6 +197,7 @@ export default function NewListing() {
             type="number"
             min="0"
             placeholder="Enter price"
+            defaultValue={price}
             onChange={(e) =>
               setPrice(
                 Math.round((+e.target.value + Number.EPSILON) * 100) / 100,
@@ -159,6 +219,7 @@ export default function NewListing() {
           type="number"
           min="0"
           step="1"
+          defaultValue={quantity}
           onChange={(e) => setQuantity(Math.floor(+e.target.value))}
           onBlur={() => {
             if (quantityRef.current) {
@@ -167,16 +228,38 @@ export default function NewListing() {
           }}
         ></input>
 
+        {/* Status */}
+        <h2 className="text-1xl font-bold">Status</h2>
+        <select
+          value={status}
+          onChange={(e) => {
+            if (quantity > 0) {
+              setStatus(+e.target.value);
+            }
+          }}
+          disabled={quantity <= 0}
+          className="border rounded p-2"
+        >
+          {quantity > 0 ? (
+            <>
+              <option value={1}>Active</option>
+              <option value={0}>Inactive</option>
+            </>
+          ) : (
+            <option value={2}>Out of Stock / Sold</option>
+          )}
+        </select>
+
         {errorMessage && <p className="text-red-500">{errorMessage}</p>}
 
         <button
           onClick={(e) => {
             e.preventDefault();
-            handleListProduct();
+            editProductListing();
           }}
           className="mt-4 px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 cursor-pointer"
         >
-          List Product
+          Update Product
         </button>
       </form>
       <CategoryModal
@@ -187,5 +270,7 @@ export default function NewListing() {
         }}
       />
     </div>
+  ) : (
+    <></>
   );
 }

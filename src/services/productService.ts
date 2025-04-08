@@ -40,3 +40,45 @@ export const listProduct = async (listingInfo: any) => {
     console.log("Database Error:", err.message);
   }
 };
+
+export const getProduct = async (sellerEmail: string, listingId: number) => {
+  const product: Product_Listing = db
+    .prepare(
+      "SELECT * FROM Product_Listings WHERE seller_email = ? AND listing_id = ?",
+    )
+    .get(sellerEmail, listingId) as Product_Listing;
+
+  if (!product) {
+    throw new Error("Product not found");
+  }
+
+  return product;
+};
+
+export const updateProduct = async (productInfo: any) => {
+  const product: Product_Listing = {
+    seller_email: productInfo.seller_email,
+    listing_id: parseInt(productInfo.listing_id),
+    category: productInfo.category,
+    product_title: productInfo.product_title,
+    product_name: productInfo.product_name,
+    product_description: productInfo.product_description,
+    quantity: parseInt(productInfo.quantity),
+    product_price: parseFloat(productInfo.product_price),
+    status: parseInt(productInfo.status),
+  };
+
+  db.prepare(
+    "UPDATE Product_Listings SET category = ?, product_title = ?, product_name = ?, product_description = ?, quantity = ?, product_price = ?, status = ? WHERE seller_email = ? AND listing_id = ?",
+  ).run(
+    product.category,
+    product.product_title,
+    product.product_name,
+    product.product_description,
+    product.quantity,
+    product.product_price,
+    product.status,
+    product.seller_email,
+    product.listing_id,
+  );
+};
