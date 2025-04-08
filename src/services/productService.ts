@@ -82,3 +82,11 @@ export const updateProduct = async (productInfo: any) => {
     product.listing_id,
   );
 };
+
+export const getProductsBySeller = async (sellerEmail: string) => {
+  const products: Product_Listing[] = db
+    .prepare("SELECT * FROM Product_Listings WHERE seller_email = ?")
+    .all(sellerEmail) as Product_Listing[];
+
+  return products;
+};

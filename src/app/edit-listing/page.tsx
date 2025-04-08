@@ -26,6 +26,9 @@ export default function EditListing() {
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [status, setStatus] = useState(1);
 
+  const titleRef = useRef(null);
+  const nameRef = useRef(null);
+  const descriptionRef = useRef(null);
   const priceRef = useRef(null);
   const quantityRef = useRef(null);
 
@@ -74,6 +77,22 @@ export default function EditListing() {
       setPrice(product.product_price);
       setQuantity(product.quantity);
       setStatus(product.status);
+
+      if (titleRef.current) {
+        titleRef.current.value = product.product_title;
+      }
+      if (nameRef.current) {
+        nameRef.current.value = product.product_name;
+      }
+      if (descriptionRef.current) {
+        descriptionRef.current.value = product.product_description;
+      }
+      if (priceRef.current) {
+        priceRef.current.value = product.product_price;
+      }
+      if (quantityRef.current) {
+        quantityRef.current.value = product.quantity;
+      }
     };
     fetchProductListing();
   }, [session, router, searchParams]);
@@ -140,13 +159,14 @@ export default function EditListing() {
     router.push("/dashboard");
   };
 
-  return session ? (
+  return (
     <div className="flex flex-col w-full justify-center items-center p-4">
       <h1 className="text-2xl font-bold mt-6">Update Product</h1>
       <form className="w-md p-10 mt-10 bg-white shadow-lg rounded-2xl flex flex-col gap-4">
         {/* Title */}
         <h2 className="text-1xl font-bold">Title</h2>
         <input
+          ref={titleRef}
           className="w-full p-2 border rounded mb-2"
           onChange={(e) => setTitle(e.target.value)}
           defaultValue={title}
@@ -155,6 +175,7 @@ export default function EditListing() {
         {/* Name */}
         <h2 className="text-1xl font-bold">Name</h2>
         <input
+          ref={nameRef}
           className="w-full p-2 border rounded mb-2"
           onChange={(e) => setName(e.target.value)}
           defaultValue={name}
@@ -163,6 +184,7 @@ export default function EditListing() {
         {/* Description */}
         <h2 className="text-1xl font-bold">Description</h2>
         <input
+          ref={descriptionRef}
           className="w-full p-2 border rounded mb-2"
           onChange={(e) => setDescription(e.target.value)}
           defaultValue={description}
@@ -270,7 +292,5 @@ export default function EditListing() {
         }}
       />
     </div>
-  ) : (
-    <></>
   );
 }
