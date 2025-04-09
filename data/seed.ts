@@ -171,6 +171,17 @@ async function createTables() {
         FOREIGN KEY (order_id) REFERENCES Orders(order_id) ON DELETE CASCADE ON UPDATE CASCADE
       );
     `);
+
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS Shopping_Cart (
+        buyer_email TEXT NOT NULL,
+        listing_seller_email TEXT NOT NULL,
+        listing_id INTEGER NOT NULL,
+        quantity INTEGER NOT NULL,
+        PRIMARY KEY (buyer_email, listing_seller_email, listing_id),
+        FOREIGN KEY (buyer_email) REFERENCES Buyer(email) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (listing_seller_email, listing_id) REFERENCES Product_Listings(seller_email, listing_id) ON DELETE CASCADE ON UPDATE CASCADE
+    `);
   } catch (error) {
     console.error("Error:", error);
   } finally {

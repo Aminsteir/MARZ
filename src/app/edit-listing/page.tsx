@@ -121,7 +121,7 @@ export default function EditListing() {
     } else if (price <= 0) {
       setErrorMessage("Product listing must include a valid price");
       return;
-    } else if (quantity <= 0) {
+    } else if (quantity < 0) {
       setErrorMessage("Product listing must include a valid quantity");
       return;
     }

@@ -68,6 +68,19 @@ export const updateProduct = async (productInfo: any) => {
     status: parseInt(productInfo.status),
   };
 
+  if (product.quantity <= 0) {
+    product.status = 2; // Out of stock/Sold
+  } else if (product.status === 2) {
+    product.status = 1; // Reset status to active if quantity > 0
+  }
+
+  // If the product is not active (status !== 1), remove it from the shopping cart
+  if (product.status !== 1) {
+    db.prepare(
+      "DELETE FROM Shopping_Cart WHERE listing_seller_email = ? AND listing_id = ?",
+    ).run(product.seller_email, product.listing_id);
+  }
+
   db.prepare(
     "UPDATE Product_Listings SET category = ?, product_title = ?, product_name = ?, product_description = ?, quantity = ?, product_price = ?, status = ? WHERE seller_email = ? AND listing_id = ?",
   ).run(

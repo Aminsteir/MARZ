@@ -87,4 +87,9 @@ export interface Review {
   review_desc: string;
 }
 
+export interface CartItem {
+  product: Product_Listing;
+  quantity: number;
+}
+
 export type UserRole = "Helpdesk" | "Buyer" | "Seller" | null;
