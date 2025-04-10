@@ -181,6 +181,7 @@ async function createTables() {
         PRIMARY KEY (buyer_email, listing_seller_email, listing_id),
         FOREIGN KEY (buyer_email) REFERENCES Buyer(email) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (listing_seller_email, listing_id) REFERENCES Product_Listings(seller_email, listing_id) ON DELETE CASCADE ON UPDATE CASCADE
+      );
     `);
   } catch (error) {
     console.error("Error:", error);

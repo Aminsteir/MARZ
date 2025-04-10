@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
   if (
     !session ||
     !session.user ||
-    (session.user.role as UserRole) === "Buyer"
+    (session.user.role as UserRole) === "Seller"
   ) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }

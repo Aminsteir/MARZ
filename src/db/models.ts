@@ -87,6 +87,13 @@ export interface Review {
   review_desc: string;
 }
 
+export interface CartItemRaw {
+  buyer_email: string;
+  listing_seller_email: string;
+  listing_id: number;
+  quantity: number;
+}
+
 export interface CartItem {
   product: Product_Listing;
   quantity: number;
