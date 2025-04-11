@@ -10,8 +10,6 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  console.log(body, typeof body);
-
   if (
     !("seller_email" in body) ||
     !("listing_id" in body) ||
