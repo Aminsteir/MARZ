@@ -54,7 +54,7 @@ export const getCart = async (email: string): Promise<CartItem[]> => {
   return cart;
 };
 
-export const updateQuantity = async (
+export const updateCart = async (
   buyer_email: string,
   seller_email: string,
   listing_id: number,

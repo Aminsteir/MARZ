@@ -53,27 +53,78 @@ export default function ShoppingCart() {
     setTotalCost(total);
   }, [cart]);
 
-  const handleQuantityChange = (index: number, newQty: number) => {
+  const handleQuantityChange = async (index: number, newQty: number) => {
     const item = cart[index];
     const maxQty = item.product.quantity;
-
     const finalQty = Math.max(1, Math.min(newQty, maxQty));
-    const updatedCart = [...cart];
-    updatedCart[index].quantity = finalQty;
-    setCart(updatedCart);
 
-    // TODO: update cart in database
+    async function updateQuantity() {
+      const response = await fetch("/api/update-cart", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          seller_email: item.product.seller_email,
+          listing_id: item.product.listing_id,
+          quantity: finalQty,
+        }),
+      });
+
+      if (!response.ok) {
+        console.error("Failed to update cart");
+        return false;
+      }
+
+      return true;
+    }
+
+    const status = await updateQuantity();
+
+    if (status) {
+      const updatedCart = [...cart];
+      updatedCart[index].quantity = finalQty;
+      setCart(updatedCart);
+    }
   };
 
-  const handleRemove = async (listing_id: number) => {
-    // TODO: Add removal logic
+  const handleRemove = async (index: number) => {
+    const item = cart[index];
+
+    async function removeFromCart() {
+      const response = await fetch("/api/update-cart", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          seller_email: item.product.seller_email,
+          listing_id: item.product.listing_id,
+          quantity: 0,
+        }),
+      });
+
+      if (!response.ok) {
+        console.error("Failed to remove product from cart");
+        return false;
+      }
+
+      return true;
+    }
+
+    const status = await removeFromCart();
+    if (status) {
+      const newCart = [...cart];
+      newCart.splice(index, 1);
+      setCart(newCart);
+    }
   };
 
   const handleCheckout = () => {
     router.push("/checkout");
   };
 
-  // TODO: retrieve seller average rating
+  // TODO: retrieve seller average rating -- whenever the review task is completed
   const getRating = (email: string): number => {
     return +(4).toFixed(1);
   };
@@ -162,7 +213,7 @@ export default function ShoppingCart() {
 
                     {/* Remove */}
                     <button
-                      onClick={() => handleRemove(item.product.listing_id)}
+                      onClick={() => handleRemove(index)}
                       className="flex items-center gap-1 text-red-600 cursor-pointer hover:underline"
                     >
                       <Trash size={16} />
