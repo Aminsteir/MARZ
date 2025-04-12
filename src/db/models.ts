@@ -100,3 +100,10 @@ export interface CartItem {
 }
 
 export type UserRole = "Helpdesk" | "Buyer" | "Seller" | null;
+
+export interface Shopping_Cart {
+  buyer_email: string;
+  listing_seller_email: string;
+  listing_id: number;
+  quantity: number;
+}

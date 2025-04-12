@@ -1,12 +1,12 @@
 "use client";
-import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { UserRole, CartItem } from "@/db/models";
-import { useEffect, useState } from "react";
-import LoadingScreen from "@/components/LoadingScreen";
+import { useSession } from "next-auth/react";
+import { useState, useEffect } from "react";
+import { UserRole, CartItem, Shopping_Cart } from "@/db/models";
 import { Minus, Plus, Trash, Star } from "lucide-react";
+import LoadingScreen from "@/components/LoadingScreen";
 
-export default function ShoppingCart() {
+export default function Checkout() {
   const router = useRouter();
   const { data: session } = useSession({
     required: true,
@@ -69,8 +69,8 @@ export default function ShoppingCart() {
     // TODO: Add removal logic
   };
 
-  const handleCheckout = () => {
-    router.push("/checkout");
+  const handleConfirmation = () => {
+    router.push("/dashboard");
   };
 
   // TODO: retrieve seller average rating
@@ -84,7 +84,7 @@ export default function ShoppingCart() {
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <h1 className="text-3xl font-bold mb-6">Shopping Cart</h1>
+      <h1 className="text-3xl font-bold mb-6">Checkout</h1>
 
       {cart.length === 0 ? (
         <p>Your cart is empty.</p>
@@ -137,41 +137,9 @@ export default function ShoppingCart() {
                 <div className="flex items-center justify-between mt-2 flex-wrap gap-2">
                   {/* Quantity + Remove + Max info */}
                   <div className="flex items-center gap-3">
-                    {/* Quantity control */}
-                    <div className="flex items-center border rounded px-2 py-1">
-                      <button
-                        onClick={() =>
-                          handleQuantityChange(index, item.quantity - 1)
-                        }
-                        disabled={item.quantity <= 1}
-                        className="p-1 disabled:opacity-40 cursor-pointer"
-                      >
-                        <Minus size={16} />
-                      </button>
-                      <span className="px-4 select-none">{item.quantity}</span>
-                      <button
-                        onClick={() =>
-                          handleQuantityChange(index, item.quantity + 1)
-                        }
-                        disabled={item.quantity >= item.product.quantity}
-                        className="p-1 disabled:opacity-40 cursor-pointer"
-                      >
-                        <Plus size={16} />
-                      </button>
-                    </div>
-
-                    {/* Remove */}
-                    <button
-                      onClick={() => handleRemove(item.product.listing_id)}
-                      className="flex items-center gap-1 text-red-600 cursor-pointer hover:underline"
-                    >
-                      <Trash size={16} />
-                      Remove
-                    </button>
-
-                    {/* Max quantity */}
-                    <div className="text-xs text-gray-400">
-                      Max: {item.product.quantity}
+                    {/* Quantity */}
+                    <div className="flex items-center px-2 py-1">
+                      <span className="px-4 select-none font-bold">{item.quantity}</span>
                     </div>
                   </div>
 
@@ -185,22 +153,51 @@ export default function ShoppingCart() {
             ))}
           </div>
 
-          {/* Checkout Summary */}
-          <div className="flex justify-end mt-8">
-            <div className="text-right">
-              <p className="text-xl font-semibold">
-                Subtotal ({cart.length} item{cart.length > 1 ? "s" : ""}):{" "}
-                <span className="ml-1">${totalCost}</span>
-              </p>
-              <button
-                onClick={handleCheckout}
-                className="mt-4 bg-yellow-500 hover:bg-yellow-600 text-black font-medium px-6 py-2 rounded cursor-pointer"
-              >                
-                Proceed to Checkout
-              </button>
-              
-            </div>
-          </div>
+        {/* Checkout Summary */}
+        <div className="flex justify-end mt-8">
+        <div className="text-right">
+            {(() => {
+            const subtotal = parseFloat(totalCost);
+            const tariff = subtotal * 0.15;
+            const serviceFee = 10.0;
+            const deliveryFee = subtotal > 2000 ? 0.0 : 5.0;
+            const finalTotal = subtotal + tariff + serviceFee + deliveryFee;
+
+            return (
+                <>
+                <p className="text-xl font-semibold">
+                    Subtotal ({cart.length} item{cart.length > 1 ? "s" : ""}):{" "}
+                    <span className="ml-1">${subtotal.toFixed(2)}</span>
+                </p>
+                <p className="text-lg mt-2">
+                    Tariff Charge (15%):{" "}
+                    <span className="ml-1">${tariff.toFixed(2)}</span>
+                </p>
+                <p className="text-lg">
+                    Service Fee: <span className="ml-1">${serviceFee.toFixed(2)}</span>
+                </p>
+                <p className="text-lg">
+                    Delivery Fee:{" "}
+                    <span className="ml-1">
+                    {deliveryFee === 0 ? "Free" : `$${deliveryFee.toFixed(2)}`}
+                    </span>
+                </p>
+                <p className="text-xl font-bold mt-2">
+                    Final Total: <span className="ml-1">${finalTotal.toFixed(2)}</span>
+                </p>
+                <button
+                    onClick={handleConfirmation}
+                    className="mt-4 bg-yellow-500 hover:bg-yellow-600 text-black font-medium px-6 py-2 rounded cursor-pointer"
+                >
+                    Confirm checkout
+                </button>
+                </>
+            );
+            })()}
+        </div>
+        </div>
+
+
         </>
       )}
     </div>
