@@ -1,4 +1,4 @@
-import { Product_Listing, UserRole } from "@/db/models";
+import { Product_Listing } from "@/db/models";
 import { getProductsBySeller } from "@/services/productService";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
@@ -6,11 +6,7 @@ import { authOptions } from "../auth/[...nextauth]/route";
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
-  if (
-    !session ||
-    !session.user ||
-    (session.user.role as UserRole) === "Buyer"
-  ) {
+  if (!session || !session.user) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
