@@ -20,7 +20,7 @@ export default function BuyerDash() {
   // Get the current Buyer info. on page load
   useEffect(() => {
     const fetchProfile = async () => {
-      const res = await fetch("/api/buyer/profile");
+      const res = await fetch("/api/buyer-profile");
       const data = await res.json();
       setProfile({ ...data, password: "" }); // clearing pw for security reasons :-]
     };

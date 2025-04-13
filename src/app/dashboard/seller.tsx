@@ -37,7 +37,7 @@ export default function SellerDash() {
 
     // Fetch Seller profile info.
     const fetchProfile = async () => {
-      const res = await fetch("/api/seller/profile");
+      const res = await fetch("/api/seller-profile");
       const data = await res.json();
       setProfile(data);
     };
