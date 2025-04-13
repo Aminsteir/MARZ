@@ -77,10 +77,41 @@ export async function PUT(req:NextRequest) {
 
     // get and check Buyer address
     const address = db
-                    .prepare("SELECT buyer_address_id FROM Buyer WHERE email = ?")
-                    .get(email) as { buyer_address_id: string } | undefined;
+        .prepare("SELECT buyer_address_id FROM Buyer WHERE email = ?")
+        .get(email) as { buyer_address_id: string } | undefined;
     const address_id = address?.buyer_address_id;
     if (!address_id) {
         return NextResponse.json({error: "Address was not found"}, {status: 404});
     }
+
+    // get and check zipcode 
+    const zc = db
+        .prepare("SELECT zipcode FROM Zipcode_Info WHERE zipcode = ?")
+        .get(zipcode);
+    if(!zc) {
+        db.prepare("INSERT INTO Zipcode_Info (zipcode, city, state) VALUES (?, ?, ?)").run(zipcode, city, state);
+    }
+    
+    // Updating the address
+    db.prepare(`
+        UPDATE Address
+        SET street_num = ?, street_name = ?, zipcode = ?
+        WHERE address_id = ?
+    `).run(street_number, street_name, zipcode, address_id);
+
+    // Updating business name
+    db.prepare(`
+        UPDATE Buyer
+        SET business_name = ?
+        WHERE email = ?
+    `).run(business_name, email);
+
+    // Udpating pw if inputted (not empty string) --> making sure to hash it !!!
+    if (password && password.trim() !== "") {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        db.prepare("UPDATE Users SET password = ? WHERE email = ?" ).run(hashedPassword, email);
+    }
+
+    // Returning success message that the profile has been udpated
+    return NextResponse.json({message: "Profile updated successfully! :]"}, {status: 200});
 }
