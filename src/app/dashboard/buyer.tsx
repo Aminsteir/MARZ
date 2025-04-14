@@ -1,6 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 export default function BuyerDash() {
   const router = useRouter();
@@ -22,7 +23,10 @@ export default function BuyerDash() {
     const fetchProfile = async () => {
       const res = await fetch("/api/buyer-profile");
       const data = await res.json();
-      setProfile({ ...data, password: "" }); // clearing pw for security reasons :-]
+      setProfile((prev) => ({
+        ...prev,
+        ...data,
+      }));
     };
     fetchProfile();
   }, []);
@@ -81,12 +85,20 @@ export default function BuyerDash() {
       <form onSubmit={handleSubmit} className="w-full max-w-md mt-8 space-y-4">
         {/* Email - shown but not editable */}
         <div>
-          <label>Email (uneditable)</label>
+          <label className="flex flex-row">
+            <span className="flex-1">Email (uneditable)</span>
+            <Link
+              href={"/submit-request"}
+              className="hover:underline text-blue-400"
+            >
+              Change Email?
+            </Link>
+          </label>
           <input
             type="email"
             value={profile.email}
             disabled
-            className="w-full px-3 py-2 border rounded bg-gray-100"
+            className="w-full px-3 py-2 border rounded bg-gray-200"
           />
         </div>
 
@@ -159,7 +171,7 @@ export default function BuyerDash() {
         {/* Submit Button */}
         <button
           type="submit"
-          className="w-full py-2 bg-green-600 text-white rounded hover:bg-green-700"
+          className="w-full py-2 bg-green-600 text-white rounded hover:bg-green-700 cursor-pointer"
         >
           Update Profile
         </button>
