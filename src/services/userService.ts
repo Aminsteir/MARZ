@@ -39,6 +39,12 @@ export const validateUserCredentials = async (
   return user;
 };
 
+const hashPassword = async (password: string): Promise<string> => {
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(password, salt);
+  return hashedPassword;
+};
+
 /*
  * Register a new user
  */
@@ -49,8 +55,8 @@ export const registerUser = async (userInfo: any): Promise<User | null> => {
   if (existingUser) {
     throw new Error("User already exists");
   }
-  const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash(password, salt);
+
+  const hashedPassword = await hashPassword(password);
 
   const user: User = {
     email,
@@ -167,4 +173,15 @@ export const getUserRole = async (email: string): Promise<UserRole> => {
   if (seller) return "Seller";
 
   return null;
+};
+
+export const updateUserPassword = async (
+  email: string,
+  newPassword: string,
+): Promise<void> => {
+  const hashedPassword = await hashPassword(newPassword);
+  db.prepare("UPDATE Users SET password = ? WHERE email = ?").run(
+    hashedPassword,
+    email,
+  );
 };
