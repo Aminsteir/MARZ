@@ -3,8 +3,10 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import { UserRole, CartItem, Shopping_Cart } from "@/db/models";
+// import  checkoutConfirmed from "./confirmation";
 import { Minus, Plus, Trash, Star } from "lucide-react";
 import LoadingScreen from "@/components/LoadingScreen";
+import { useTransition } from "react";
 
 export default function Checkout() {
   const router = useRouter();
@@ -55,16 +57,23 @@ export default function Checkout() {
 
 
 
+
+  
+  const [isPending, startTransition] = useTransition();
+  
   const handleConfirmation = async () => {
-    alert("ahhhh");
     const res = await fetch("/api/confirm-checkout", { method: "POST" });
   
     if (res.ok) {
-      router.push("/dashboard");
+      const { orderIds } = await res.json();
+      const queryString = orderIds.join(",");
+      router.push(`/checkout-confirmed?orders=${queryString}`);
     } else {
       alert("Checkout failed. Please try again.");
     }
   };
+  
+  
   
 
   // TODO: retrieve seller average rating

@@ -4,7 +4,6 @@ import { authOptions } from "../auth/[...nextauth]/route";
 import { confirmCheckout } from "@/services/checkoutService";
 
 export async function POST(req: Request) {
-    console.log("aaaaahhhhh");
     const session = await getServerSession(authOptions);
 
     if (!session || !session.user || !session.user.email) {
@@ -14,8 +13,8 @@ export async function POST(req: Request) {
     const buyerEmail = session.user.email;
 
     try {
-        await confirmCheckout(buyerEmail);
-        return NextResponse.json({ message: "Checkout successful" });
+        const orderIds = await confirmCheckout(buyerEmail);
+        return NextResponse.json({ message: "Checkout successful", orderIds });
     } catch (error) {
         console.error("Checkout failed:", error);
         return NextResponse.json(
@@ -23,4 +22,4 @@ export async function POST(req: Request) {
         { status: 500 },
         );
     }
-    }
+}
