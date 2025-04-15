@@ -53,25 +53,19 @@ export default function Checkout() {
     setTotalCost(total);
   }, [cart]);
 
-  const handleQuantityChange = (index: number, newQty: number) => {
-    const item = cart[index];
-    const maxQty = item.product.quantity;
 
-    const finalQty = Math.max(1, Math.min(newQty, maxQty));
-    const updatedCart = [...cart];
-    updatedCart[index].quantity = finalQty;
-    setCart(updatedCart);
 
-    // TODO: update cart in database
+  const handleConfirmation = async () => {
+    alert("ahhhh");
+    const res = await fetch("/api/confirm-checkout", { method: "POST" });
+  
+    if (res.ok) {
+      router.push("/dashboard");
+    } else {
+      alert("Checkout failed. Please try again.");
+    }
   };
-
-  const handleRemove = async (listing_id: number) => {
-    // TODO: Add removal logic
-  };
-
-  const handleConfirmation = () => {
-    router.push("/dashboard");
-  };
+  
 
   // TODO: retrieve seller average rating
   const getRating = (email: string): number => {
