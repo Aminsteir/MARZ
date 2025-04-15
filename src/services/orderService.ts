@@ -28,8 +28,8 @@ export const getOrdersByBuyer = async (buyer_email: string): Promise<ProductOrde
 
   // Combine each order with its matching listing
   const productOrders: ProductOrder[] = orders.map((order) => ({
-    ...order,
     ...listingMap[order.listing_id],
+    ...order,
   }));
 
   return productOrders;
