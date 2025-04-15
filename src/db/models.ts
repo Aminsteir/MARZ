@@ -81,6 +81,8 @@ export interface Order {
   payment: number;
 }
 
+export interface ProductOrder extends Order, Product_Listing {}
+
 export interface Review {
   order_id: number;
   rating: number;
