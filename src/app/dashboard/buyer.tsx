@@ -2,6 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Order, ProductOrder } from "@/db/models";
+import ReviewButton from "@/components/ReviewButton";
 
 export default function BuyerDash() {
   const router = useRouter();
@@ -66,16 +67,7 @@ export default function BuyerDash() {
             <p className="text-sm text-gray-500">
               {order.date}
             </p>
-            <button
-              className="mt-2 px-4 py-1 bg-gray-200 hover:bg-gray-300 rounded"
-              // onClick={() =>
-              //   router.push(
-              //     `/edit-listing?seller_email=${encodeURIComponent(product.seller_email)}&listing_id=${encodeURIComponent(product.listing_id)}`,
-              //   )
-              // }
-            >
-              View
-            </button>
+            <ReviewButton></ReviewButton>
           </div>
         ))}
       </div>
