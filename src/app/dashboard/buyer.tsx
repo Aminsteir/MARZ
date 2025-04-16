@@ -6,7 +6,7 @@ import ReviewButton from "@/components/ReviewButton";
 
 function OrderComponent({ order }) {
   return (
-    <div className="border p-4 rounded shadow">
+    <div className="border p-4 rounded shadow h-fit">
       <h2 className="text-xl font-semibold">{order.product_title}</h2>
       <p>{order.product_description}</p>
       <p className="text-sm text-gray-500">Price: ${order.payment}</p>
