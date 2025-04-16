@@ -1,6 +1,12 @@
 import db from "@/db/db";
 import { CartItem, CartItemRaw, Product_Listing } from "@/db/models";
 
+export const emptyCart = async (buyer_email: string) => {
+  db.prepare("DELETE FROM Shopping_Cart WHERE buyer_email = ?").run(
+    buyer_email,
+  );
+};
+
 export const removeFromCart = async (
   buyer_email: string,
   product_listing: Product_Listing,
