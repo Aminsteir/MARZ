@@ -1,8 +1,21 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Order, ProductOrder } from "@/db/models";
+import { ProductOrder } from "@/db/models";
 import ReviewButton from "@/components/ReviewButton";
+
+function OrderComponent({ order }) {
+  return (
+    <div className="border p-4 rounded shadow">
+      <h2 className="text-xl font-semibold">{order.product_title}</h2>
+      <p>{order.product_description}</p>
+      <p className="text-sm text-gray-500">Price: ${order.payment}</p>
+      <p className="text-sm text-gray-500">Quantity: {order.quantity}</p>
+      <p className="text-sm text-gray-500">{order.date}</p>
+      <ReviewButton></ReviewButton>
+    </div>
+  );
+}
 
 export default function BuyerDash() {
   const router = useRouter();
@@ -61,14 +74,7 @@ export default function BuyerDash() {
       </h1>
       <div className="w-full mt-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {orders.map((order) => (
-          <div key={order.order_id} className="border p-4 rounded shadow">
-            <h2 className="text-xl font-semibold">{order.product_title}</h2>
-            <p>{order.product_description}</p>
-            <p className="text-sm text-gray-500">Price: ${order.payment}</p>
-            <p className="text-sm text-gray-500">Quantity: {order.quantity}</p>
-            <p className="text-sm text-gray-500">{order.date}</p>
-            <ReviewButton></ReviewButton>
-          </div>
+          <OrderComponent order={order} key={order.order_id} />
         ))}
       </div>
     </div>
