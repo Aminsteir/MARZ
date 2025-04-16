@@ -46,6 +46,9 @@ export default function SellerDash() {
       </div>
 
       {/* Product Listings Display */}
+      <h1 className="text-xl font-bold mt-6 w-full text-left border-b border-black pb-2">
+        Product Listings
+      </h1>
       <div className="w-full mt-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {listings.map((product) => (
           <div key={product.listing_id} className="border p-4 rounded shadow">

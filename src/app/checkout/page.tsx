@@ -55,15 +55,11 @@ export default function Checkout() {
     setTotalCost(total);
   }, [cart]);
 
-
-
-
-  
   const [isPending, startTransition] = useTransition();
-  
+
   const handleConfirmation = async () => {
     const res = await fetch("/api/confirm-checkout", { method: "POST" });
-  
+
     if (res.ok) {
       const { orderIds } = await res.json();
       const queryString = orderIds.join(",");
@@ -72,9 +68,6 @@ export default function Checkout() {
       alert("Checkout failed. Please try again.");
     }
   };
-  
-  
-  
 
   // TODO: retrieve seller average rating
   const getRating = (email: string): number => {
@@ -142,7 +135,9 @@ export default function Checkout() {
                   <div className="flex items-center gap-3">
                     {/* Quantity */}
                     <div className="flex items-center px-2 py-1">
-                      <span className="px-4 select-none font-bold">{item.quantity}</span>
+                      <span className="px-4 select-none font-bold">
+                        {item.quantity}
+                      </span>
                     </div>
                   </div>
 
@@ -156,51 +151,53 @@ export default function Checkout() {
             ))}
           </div>
 
-        {/* Checkout Summary */}
-        <div className="flex justify-end mt-8">
-        <div className="text-right">
-            {(() => {
-            const subtotal = parseFloat(totalCost);
-            const tariff = subtotal * 0.15;
-            const serviceFee = 10.0;
-            const deliveryFee = subtotal > 2000 ? 0.0 : 5.0;
-            const finalTotal = subtotal + tariff + serviceFee + deliveryFee;
+          {/* Checkout Summary */}
+          <div className="flex justify-end mt-8">
+            <div className="text-right">
+              {(() => {
+                const subtotal = parseFloat(totalCost);
+                const tariff = subtotal * 0.15;
+                const serviceFee = 10.0;
+                const deliveryFee = subtotal > 2000 ? 0.0 : 5.0;
+                const finalTotal = subtotal + tariff + serviceFee + deliveryFee;
 
-            return (
-                <>
-                <p className="text-xl font-semibold">
-                    Subtotal ({cart.length} item{cart.length > 1 ? "s" : ""}):{" "}
-                    <span className="ml-1">${subtotal.toFixed(2)}</span>
-                </p>
-                <p className="text-lg mt-2">
-                    Tariff Charge (15%):{" "}
-                    <span className="ml-1">${tariff.toFixed(2)}</span>
-                </p>
-                <p className="text-lg">
-                    Service Fee: <span className="ml-1">${serviceFee.toFixed(2)}</span>
-                </p>
-                <p className="text-lg">
-                    Delivery Fee:{" "}
-                    <span className="ml-1">
-                    {deliveryFee === 0 ? "Free" : `$${deliveryFee.toFixed(2)}`}
-                    </span>
-                </p>
-                <p className="text-xl font-bold mt-2">
-                    Final Total: <span className="ml-1">${finalTotal.toFixed(2)}</span>
-                </p>
-                <button
-                    onClick={handleConfirmation}
-                    className="mt-4 bg-yellow-500 hover:bg-yellow-600 text-black font-medium px-6 py-2 rounded cursor-pointer"
-                >
-                    Confirm checkout
-                </button>
-                </>
-            );
-            })()}
-        </div>
-        </div>
-
-
+                return (
+                  <>
+                    <p className="text-xl font-semibold">
+                      Subtotal ({cart.length} item{cart.length > 1 ? "s" : ""}):{" "}
+                      <span className="ml-1">${subtotal.toFixed(2)}</span>
+                    </p>
+                    <p className="text-lg mt-2">
+                      Tariff Charge (15%):{" "}
+                      <span className="ml-1">${tariff.toFixed(2)}</span>
+                    </p>
+                    <p className="text-lg">
+                      Service Fee:{" "}
+                      <span className="ml-1">${serviceFee.toFixed(2)}</span>
+                    </p>
+                    <p className="text-lg">
+                      Delivery Fee:{" "}
+                      <span className="ml-1">
+                        {deliveryFee === 0
+                          ? "Free"
+                          : `$${deliveryFee.toFixed(2)}`}
+                      </span>
+                    </p>
+                    <p className="text-xl font-bold mt-2">
+                      Final Total:{" "}
+                      <span className="ml-1">${finalTotal.toFixed(2)}</span>
+                    </p>
+                    <button
+                      onClick={handleConfirmation}
+                      className="mt-4 bg-yellow-500 hover:bg-yellow-600 text-black font-medium px-6 py-2 rounded cursor-pointer"
+                    >
+                      Confirm checkout
+                    </button>
+                  </>
+                );
+              })()}
+            </div>
+          </div>
         </>
       )}
     </div>
