@@ -6,7 +6,7 @@ import { CheckCircle } from "lucide-react";
 export default function CheckoutConfirmed() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const orderIds = searchParams.get("order")?.split(",") || [];
+  const orderIds = searchParams.get("orders")?.split(",") || [];
 
   const handleGoToDashboard = () => {
     router.push("/dashboard");
