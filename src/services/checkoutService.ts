@@ -1,6 +1,6 @@
 import db from "@/db/db";
 import { CartItem } from "@/db/models";
-import { removeFromCart, getCart, emptyCart } from "./cartService";
+import { getCart, emptyCart } from "./cartService";
 
 // Confirms checkout: deducts inventory, adds orders, clears cart
 export const confirmCheckout = async (
@@ -25,11 +25,20 @@ export const confirmCheckout = async (
       );
     }
 
+    if (purchaseQty == product.quantity) {
+      product.status = 2;
+    }
+
     db.prepare(
       `UPDATE Product_Listings
-            SET quantity = quantity - ?
+            SET quantity = quantity - ?, status = ?
             WHERE seller_email = ? AND listing_id = ?`,
-    ).run(purchaseQty, product.seller_email, product.listing_id);
+    ).run(
+      purchaseQty,
+      product.status,
+      product.seller_email,
+      product.listing_id,
+    );
 
     const result = db
       .prepare(

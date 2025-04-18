@@ -145,7 +145,9 @@ export default function UserProfile() {
     }
   };
 
-  if (!session || !role) return <LoadingScreen />;
+  if (!session || !role) {
+    return <LoadingScreen />;
+  }
 
   return (
     <div className="flex flex-col w-full justify-center items-center p-4">

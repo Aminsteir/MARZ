@@ -1,5 +1,5 @@
 import db from "@/db/db";
-import { Address, User, ZipcodeInfo, UserRole } from "@/db/models";
+import { Address, User, ZipcodeInfo, UserRole, Credit_Card } from "@/db/models";
 import bcrypt from "bcryptjs";
 import { v4 } from "uuid";
 
@@ -183,5 +183,34 @@ export const updateUserPassword = async (
   db.prepare("UPDATE Users SET password = ? WHERE email = ?").run(
     hashedPassword,
     email,
+  );
+};
+
+export const getCreditCards = async (email: string): Promise<Credit_Card[]> => {
+  const cards = db
+    .prepare("SELECT * FROM Credit_Cards WHERE owner_email = ?")
+    .all(email) as Credit_Card[];
+
+  return cards;
+};
+
+export const addCreditCard = async (card: Credit_Card): Promise<void> => {
+  const existingCard = db
+    .prepare("SELECT * FROM Credit_Cards WHERE credit_card_num = ?")
+    .get(card.credit_card_num) as Credit_Card;
+
+  if (existingCard) {
+    throw new Error("Card already exists");
+  }
+
+  db.prepare(
+    "INSERT INTO Credit_Cards (credit_card_num, card_type, expire_month, expire_year, security_code, owner_email) VALUES (?, ?, ?, ?, ?, ?)",
+  ).run(
+    card.credit_card_num,
+    card.card_type,
+    card.expire_month,
+    card.expire_year,
+    card.security_code,
+    card.owner_email,
   );
 };

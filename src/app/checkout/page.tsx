@@ -1,12 +1,10 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useState, useEffect } from "react";
-import { UserRole, CartItem, Shopping_Cart } from "@/db/models";
-// import  checkoutConfirmed from "./confirmation";
-import { Minus, Plus, Trash, Star } from "lucide-react";
+import { useState, useEffect, ChangeEvent, FormEvent } from "react";
+import { UserRole, CartItem, Credit_Card } from "@/db/models";
 import LoadingScreen from "@/components/LoadingScreen";
-import { useTransition } from "react";
+import { Star } from "lucide-react";
 
 export default function Checkout() {
   const router = useRouter();
@@ -18,9 +16,25 @@ export default function Checkout() {
   });
 
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [cards, setCards] = useState<Credit_Card[]>([]);
+  const [selectedCard, setSelectedCard] = useState<string>("");
+  const [showNewCardForm, setShowNewCardForm] = useState(false);
+  const [newCard, setNewCard] = useState<Credit_Card>({
+    credit_card_num: "",
+    card_type: "",
+    expire_month: "",
+    expire_year: "",
+    security_code: "",
+    owner_email: "",
+  });
+  const [addingCard, setAddingCard] = useState(false);
   const [totalCost, setTotalCost] = useState("");
   const [loading, setLoading] = useState(true);
 
+  // mask all digits except last 4
+  const maskNumber = (num: string) => num.slice(-4);
+
+  // load cart and cards
   useEffect(() => {
     if (session && (session.user.role as UserRole) !== "Buyer") {
       router.push("/");
@@ -28,24 +42,39 @@ export default function Checkout() {
     }
     if (!session) return;
 
-    async function loadCart() {
-      const response = await fetch("/api/get-cart");
-      if (!response.ok) {
-        console.error("Failed to fetch cart");
-        setLoading(false);
-        return;
-      }
+    async function loadCartAndCards() {
+      try {
+        const [cartRes, cardsRes] = await Promise.all([
+          fetch("/api/get-cart"),
+          fetch("/api/get-cards"),
+        ]);
 
-      const data: CartItem[] = (await response.json()).data;
-      setCart(data);
-      setLoading(false);
+        if (!cartRes.ok || !cardsRes.ok) {
+          console.error("Failed to fetch cart or cards");
+          router.push("/cart");
+          return;
+        }
+
+        const cartData: CartItem[] = (await cartRes.json()).data;
+        const cardsData: Credit_Card[] = (await cardsRes.json()).data;
+
+        setCart(cartData);
+        setCards(cardsData);
+
+        if (cardsData.length <= 0) {
+          setShowNewCardForm(true);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
     }
 
-    loadCart();
+    loadCartAndCards();
   }, [session, router]);
 
   useEffect(() => {
-    if (!cart) return;
     const total = cart
       .reduce(
         (acc, item) => acc + item.product.product_price * item.quantity,
@@ -55,23 +84,58 @@ export default function Checkout() {
     setTotalCost(total);
   }, [cart]);
 
-  const [isPending, startTransition] = useTransition();
+  // add a new card
+  const handleAddCard = async (e: FormEvent) => {
+    e.preventDefault();
+    setAddingCard(true);
 
-  const handleConfirmation = async () => {
-    const res = await fetch("/api/confirm-checkout", { method: "POST" });
+    try {
+      const res = await fetch("/api/add-card", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newCard),
+      });
+      if (!res.ok) throw new Error("Failed to add card");
 
-    if (res.ok) {
-      const { orderIds } = await res.json();
-      const queryString = orderIds.join(",");
-      router.push(`/checkout-confirmed?orders=${queryString}`);
-    } else {
-      alert("Checkout failed. Please try again.");
+      const created: Credit_Card = (await res.json()).data;
+      setCards((prev) => [...prev, created]);
+      setSelectedCard(created.credit_card_num);
+      setShowNewCardForm(false);
+      setNewCard({
+        credit_card_num: "",
+        card_type: "",
+        expire_month: "",
+        expire_year: "",
+        security_code: "",
+        owner_email: "",
+      });
+    } catch (err) {
+      console.error(err);
+      alert("Could not save card. Please check your details.");
+    } finally {
+      setAddingCard(false);
     }
   };
 
-  // TODO: retrieve seller average rating
-  const getRating = (email: string): number => {
-    return +(4).toFixed(1);
+  // confirm checkout
+  const handleConfirmation = async () => {
+    if (!selectedCard) {
+      alert("Please select or add a credit card before checkout.");
+      return;
+    }
+
+    const res = await fetch("/api/confirm-checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ card: selectedCard }),
+    });
+
+    if (res.ok) {
+      const { orderIds } = await res.json();
+      router.push(`/checkout-confirmed?orders=${orderIds.join(",")}`);
+    } else {
+      alert("Checkout failed. Please try again.");
+    }
   };
 
   if (!session || loading) {
@@ -86,18 +150,17 @@ export default function Checkout() {
         <p>Your cart is empty.</p>
       ) : (
         <>
+          {/* Cart Items */}
           <div className="space-y-6">
-            {cart.map((item, index) => (
+            {cart.map((item) => (
               <div
                 key={item.product.listing_id}
                 className="p-4 border rounded-lg shadow-sm flex flex-col gap-2"
               >
-                {/* Title */}
                 <div className="text-lg font-semibold">
                   {item.product.product_title}
                 </div>
 
-                {/* Seller + Rating */}
                 <div className="text-sm text-gray-600 flex items-center gap-2 flex-wrap">
                   <span>
                     Sold by:{" "}
@@ -111,7 +174,7 @@ export default function Checkout() {
                         key={i}
                         size={14}
                         fill={
-                          i + 1 <= getRating(item.product.seller_email)
+                          i + 1 <= Number((4).toFixed(1))
                             ? "currentColor"
                             : "none"
                         }
@@ -119,29 +182,24 @@ export default function Checkout() {
                       />
                     ))}
                     <span className="text-xs text-gray-500 ml-1">
-                      ({getRating(item.product.seller_email).toFixed(1)})
+                      {/* TODO: GET SELLER AVG RATING */}
+                      {(4).toFixed(1)}
                     </span>
                   </span>
                 </div>
 
-                {/* Category */}
                 <div className="text-sm text-gray-500">
                   {item.product.category}
                 </div>
 
-                {/* Price + Quantity + Remove row */}
                 <div className="flex items-center justify-between mt-2 flex-wrap gap-2">
-                  {/* Quantity + Remove + Max info */}
                   <div className="flex items-center gap-3">
-                    {/* Quantity */}
                     <div className="flex items-center px-2 py-1">
                       <span className="px-4 select-none font-bold">
                         {item.quantity}
                       </span>
                     </div>
                   </div>
-
-                  {/* Price */}
                   <div className="text-md font-semibold">
                     Price: $
                     {(item.product.product_price * item.quantity).toFixed(2)}
@@ -149,6 +207,148 @@ export default function Checkout() {
                 </div>
               </div>
             ))}
+          </div>
+
+          {/* Payment Method */}
+          <div className="mt-8 border-t pt-6">
+            <h2 className="text-2xl font-semibold mb-4">Payment Method</h2>
+
+            {cards.length > 0 && !showNewCardForm && (
+              <select
+                className="border p-2 rounded w-full max-w-xs"
+                value={selectedCard}
+                onChange={(e: ChangeEvent<HTMLSelectElement>) => {
+                  if (e.target.value === "new") {
+                    setShowNewCardForm(true);
+                    setSelectedCard("");
+                  } else {
+                    setSelectedCard(e.target.value);
+                  }
+                }}
+              >
+                <option value="">Select a card</option>
+                {cards.map((c, i) => (
+                  <option key={i} value={c.credit_card_num}>
+                    {c.card_type.toUpperCase()} - x
+                    {maskNumber(c.credit_card_num)}
+                  </option>
+                ))}
+                <option value="new">Add new card</option>
+              </select>
+            )}
+
+            {showNewCardForm && (
+              <form className="space-y-4 max-w-md" onSubmit={handleAddCard}>
+                <div>
+                  <label className="block mb-1">Card Number</label>
+                  <input
+                    type="text"
+                    maxLength={19}
+                    placeholder="1234-5678-9012-3456"
+                    className="border p-2 w-full rounded"
+                    value={newCard.credit_card_num}
+                    onChange={(e) =>
+                      setNewCard((nc) => ({
+                        ...nc,
+                        credit_card_num: e.target.value.replaceAll(" ", "-"),
+                      }))
+                    }
+                    required
+                  />
+                </div>
+                <div className="flex gap-4">
+                  <div>
+                    <label className="block mb-1">Card Type</label>
+                    <input
+                      type="text"
+                      minLength={1}
+                      maxLength={10}
+                      placeholder="e.g., VISA"
+                      className="border p-2 w-30 rounded"
+                      value={newCard.card_type}
+                      onChange={(e) => {
+                        setNewCard((nc) => ({
+                          ...nc,
+                          card_type: e.target.value.toUpperCase(),
+                        }));
+                      }}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block mb-1">Exp. Month</label>
+                    <input
+                      type="number"
+                      min={1}
+                      max={12}
+                      placeholder="MM"
+                      className="border p-2 w-20 rounded"
+                      value={newCard.expire_month}
+                      onChange={(e) => {
+                        setNewCard((nc) => ({
+                          ...nc,
+                          expire_month: e.target.value,
+                        }));
+                      }}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block mb-1">Exp. Year</label>
+                    <input
+                      type="number"
+                      min={new Date().getFullYear()}
+                      placeholder="YYYY"
+                      className="border p-2 w-24 rounded"
+                      value={newCard.expire_year}
+                      onChange={(e) =>
+                        setNewCard((nc) => ({
+                          ...nc,
+                          expire_year: e.target.value,
+                        }))
+                      }
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block mb-1">CVC</label>
+                    <input
+                      type="text"
+                      maxLength={4}
+                      placeholder="123"
+                      className="border p-2 w-20 rounded"
+                      value={newCard.security_code}
+                      onChange={(e) =>
+                        setNewCard((nc) => ({
+                          ...nc,
+                          security_code: e.target.value,
+                        }))
+                      }
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="mt-6 flex flex-row gap-4">
+                  <button
+                    type="submit"
+                    disabled={addingCard}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded cursor-pointer"
+                  >
+                    {addingCard ? "Saving…" : "Save Card"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowNewCardForm(false);
+                      setAddingCard(false);
+                    }}
+                    className="bg-red-400 hover:bg-red-600 text-white px-4 py-2 rounded cursor-pointer"
+                  >
+                    Back
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
 
           {/* Checkout Summary */}
@@ -164,7 +364,8 @@ export default function Checkout() {
                 return (
                   <>
                     <p className="text-xl font-semibold">
-                      Subtotal ({cart.length} item{cart.length > 1 ? "s" : ""}):{" "}
+                      Subtotal ({cart.length} item
+                      {cart.length > 1 ? "s" : ""}):{" "}
                       <span className="ml-1">${subtotal.toFixed(2)}</span>
                     </p>
                     <p className="text-lg mt-2">
@@ -189,7 +390,12 @@ export default function Checkout() {
                     </p>
                     <button
                       onClick={handleConfirmation}
-                      className="mt-4 bg-yellow-500 hover:bg-yellow-600 text-black font-medium px-6 py-2 rounded cursor-pointer"
+                      disabled={!selectedCard}
+                      className={`mt-4 font-medium px-6 py-2 rounded ${
+                        selectedCard
+                          ? "bg-yellow-500 hover:bg-yellow-600 text-black cursor-pointer"
+                          : "bg-gray-300 text-gray-600 cursor-not-allowed"
+                      }`}
                     >
                       Confirm checkout
                     </button>

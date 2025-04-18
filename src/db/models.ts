@@ -48,9 +48,9 @@ export interface Request {
 export interface Credit_Card {
   credit_card_num: string;
   card_type: string;
-  expire_month: number;
-  expire_year: number;
-  security_code: number;
+  expire_month: string;
+  expire_year: string;
+  security_code: string;
   owner_email: string;
 }
 
