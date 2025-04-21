@@ -99,3 +99,38 @@ export const updateCart = async (
     "UPDATE Shopping_Cart SET quantity = ? WHERE buyer_email = ? AND listing_seller_email = ? AND listing_id = ?",
   ).run(newQuantity, buyer_email, seller_email, listing_id);
 };
+
+export const addProductToCart = async (
+  buyer_email: string,
+  seller_email: string,
+  listing_id: number,
+  quantity: number,
+) => {
+  const cartItem: CartItemRaw = db
+    .prepare(
+      "SELECT * FROM Shopping_Cart WHERE buyer_email = ? AND listing_seller_email = ? AND listing_id = ?",
+    )
+    .get(buyer_email, seller_email, listing_id) as CartItemRaw;
+
+  if (cartItem) {
+    throw new Error("Item already in cart");
+  }
+
+  const product: Product_Listing = db
+    .prepare(
+      "SELECT * FROM Product_Listings WHERE seller_email = ? AND listing_id = ?",
+    )
+    .get(seller_email, listing_id) as Product_Listing;
+
+  if (!product) {
+    throw new Error("Product not found");
+  }
+
+  if (quantity > product.quantity) {
+    throw new Error("Quantity exceeds available stock");
+  }
+
+  db.prepare(
+    "INSERT INTO Shopping_Cart (buyer_email, listing_seller_email, listing_id, quantity) VALUES (?, ?, ?, ?)",
+  ).run(buyer_email, seller_email, listing_id, quantity);
+};

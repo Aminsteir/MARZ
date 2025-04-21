@@ -1,5 +1,5 @@
 import db from "@/db/db";
-import { Product_Listing } from "@/db/models";
+import { Category, Product_Listing } from "@/db/models";
 
 export const listProduct = async (listingInfo: any) => {
   const listing_id = (
@@ -100,6 +100,25 @@ export const getProductsBySeller = async (sellerEmail: string) => {
   const products: Product_Listing[] = db
     .prepare("SELECT * FROM Product_Listings WHERE seller_email = ?")
     .all(sellerEmail) as Product_Listing[];
+
+  return products;
+};
+
+export const getProductsByCategory = async (
+  category: string,
+  status: number = 1,
+) => {
+  const cat: Category = db
+    .prepare("SELECT * FROM Categories WHERE category_name = ?")
+    .get(category) as Category;
+
+  if (!cat) {
+    throw new Error("Category not found");
+  }
+
+  const products: Product_Listing[] = db
+    .prepare("SELECT * FROM Product_Listings WHERE category = ? AND status = ?")
+    .all(category, status) as Product_Listing[];
 
   return products;
 };
