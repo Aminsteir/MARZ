@@ -1,5 +1,5 @@
 import db from "@/db/db";
-import { Category, Product_Listing } from "@/db/models";
+import { Category, Product_Listing, ProductWithStats } from "@/db/models";
 
 export const listProduct = async (listingInfo: any) => {
   const listing_id = (
@@ -104,10 +104,7 @@ export const getProductsBySeller = async (sellerEmail: string) => {
   return products;
 };
 
-export const getProductsByCategory = async (
-  category: string,
-  status: number = 1,
-) => {
+export const getProductsByCategory = async (category: string) => {
   const cat: Category = db
     .prepare("SELECT * FROM Categories WHERE category_name = ?")
     .get(category) as Category;
@@ -116,9 +113,98 @@ export const getProductsByCategory = async (
     throw new Error("Category not found");
   }
 
-  const products: Product_Listing[] = db
-    .prepare("SELECT * FROM Product_Listings WHERE category = ? AND status = ?")
-    .all(category, status) as Product_Listing[];
+  const rows = db
+    .prepare(
+      `SELECT
+        P.*,
+        COUNT(R.rating) AS review_count,
+        AVG(R.rating) AS avg_rating
+      FROM Product_Listings P
+      LEFT JOIN Orders O
+        ON O.seller_email = P.seller_email
+        AND O.listing_id = P.listing_id
+      LEFT JOIN Reviews R
+        ON R.order_id = O.order_id
+      WHERE P.category = ?
+        AND P.status != 0
+      GROUP BY
+        P.seller_email,
+        P.listing_id`,
+    )
+    .all(category) as (Product_Listing & {
+    review_count: number;
+    avg_rating: number;
+  })[];
+
+  const products: ProductWithStats[] = rows.map((row) => ({
+    info: {
+      seller_email: row.seller_email,
+      listing_id: row.listing_id,
+      category: row.category,
+      product_title: row.product_title,
+      product_name: row.product_name,
+      product_description: row.product_description,
+      quantity: row.quantity,
+      product_price: row.product_price,
+      status: row.status,
+    },
+    seller_stats: {
+      review_count: row.review_count,
+      avg_rating: row.avg_rating,
+    },
+  }));
+
+  return products;
+};
+
+export const searchProducts = async (query: string) => {
+  const likeQuery = `%${query}%`;
+  const rows = db
+    .prepare(
+      `SELECT
+        P.*,
+        COUNT(R.rating) AS review_count,
+        AVG(R.rating) AS avg_rating
+      FROM Product_Listings P
+      LEFT JOIN Orders O
+        ON O.seller_email = P.seller_email
+        AND O.listing_id = P.listing_id
+      LEFT JOIN Reviews R
+        ON R.order_id = O.order_id
+      WHERE (P.product_title LIKE ? OR P.product_name LIKE ? OR P.product_description LIKE ? OR P.category LIKE ? OR P.seller_email LIKE ?)
+        AND P.status != 0
+      GROUP BY
+        P.seller_email,
+        P.listing_id`,
+    )
+    .all(
+      likeQuery,
+      likeQuery,
+      likeQuery,
+      likeQuery,
+      likeQuery,
+    ) as (Product_Listing & {
+    review_count: number;
+    avg_rating: number;
+  })[];
+
+  const products: ProductWithStats[] = rows.map((row) => ({
+    info: {
+      seller_email: row.seller_email,
+      listing_id: row.listing_id,
+      category: row.category,
+      product_title: row.product_title,
+      product_name: row.product_name,
+      product_description: row.product_description,
+      quantity: row.quantity,
+      product_price: row.product_price,
+      status: row.status,
+    },
+    seller_stats: {
+      review_count: row.review_count,
+      avg_rating: row.avg_rating,
+    },
+  }));
 
   return products;
 };

@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react";
 import { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { UserRole, CartItem, Credit_Card } from "@/db/models";
 import LoadingScreen from "@/components/LoadingScreen";
-import { Star } from "lucide-react";
+import ReviewBar from "@/components/ReviewBar";
 
 export default function Checkout() {
   const router = useRouter();
@@ -77,7 +77,7 @@ export default function Checkout() {
   useEffect(() => {
     const total = cart
       .reduce(
-        (acc, item) => acc + item.product.product_price * item.quantity,
+        (acc, item) => acc + item.product.info.product_price * item.quantity,
         0,
       )
       .toFixed(2);
@@ -154,42 +154,28 @@ export default function Checkout() {
           <div className="space-y-6">
             {cart.map((item) => (
               <div
-                key={item.product.listing_id}
+                key={item.product.info.listing_id}
                 className="p-4 border rounded-lg shadow-sm flex flex-col gap-2"
               >
                 <div className="text-lg font-semibold">
-                  {item.product.product_title}
+                  {item.product.info.product_title}
                 </div>
 
                 <div className="text-sm text-gray-600 flex items-center gap-2 flex-wrap">
                   <span>
                     Sold by:{" "}
                     <span className="font-medium">
-                      {item.product.seller_email}
+                      {item.product.info.seller_email}
                     </span>
                   </span>
-                  <span className="flex items-center gap-1 text-yellow-600">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star
-                        key={i}
-                        size={14}
-                        fill={
-                          i + 1 <= Number((4).toFixed(1))
-                            ? "currentColor"
-                            : "none"
-                        }
-                        stroke="currentColor"
-                      />
-                    ))}
-                    <span className="text-xs text-gray-500 ml-1">
-                      {/* TODO: GET SELLER AVG RATING */}
-                      {(4).toFixed(1)}
-                    </span>
-                  </span>
+                  <ReviewBar
+                    rating={item.product.seller_stats.avg_rating}
+                    count={item.product.seller_stats.review_count}
+                  />
                 </div>
 
                 <div className="text-sm text-gray-500">
-                  {item.product.category}
+                  {item.product.info.category}
                 </div>
 
                 <div className="flex items-center justify-between mt-2 flex-wrap gap-2">
@@ -202,7 +188,9 @@ export default function Checkout() {
                   </div>
                   <div className="text-md font-semibold">
                     Price: $
-                    {(item.product.product_price * item.quantity).toFixed(2)}
+                    {(item.product.info.product_price * item.quantity).toFixed(
+                      2,
+                    )}
                   </div>
                 </div>
               </div>

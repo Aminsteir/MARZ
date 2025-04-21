@@ -1,6 +1,23 @@
 import db from "@/db/db";
 import { CartItem, CartItemRaw, Product_Listing } from "@/db/models";
 
+interface CartRow {
+  seller_email: string;
+  listing_id: number;
+  category: string;
+  product_title: string;
+  product_name: string;
+  product_description: string;
+  quantity: number;
+  product_price: number;
+  status: number;
+
+  cartQuantity: number;
+
+  avg_rating: number;
+  review_count: number;
+}
+
 export const emptyCart = async (buyer_email: string) => {
   db.prepare("DELETE FROM Shopping_Cart WHERE buyer_email = ?").run(
     buyer_email,
@@ -16,43 +33,60 @@ export const removeFromCart = async (
   ).run(buyer_email, product_listing.seller_email, product_listing.listing_id);
 };
 
-// Query db for all products in the cart (using "IN" and nested query)
-// This is more efficient than querying for each product individually
 export const getCart = async (email: string): Promise<CartItem[]> => {
-  interface result {
-    seller_email: string;
-    listing_id: number;
-    category: string;
-    product_title: string;
-    product_name: string;
-    product_description: string;
-    quantity: number;
-    product_price: number;
-    status: number;
+  // OLD QUERY -- Return entire cart with entire product listing info and also user cart quantity
+  // const cartItems: result[] = db
+  //   .prepare(
+  //     `SELECT pl.*, sc.quantity AS cartQuantity FROM Product_Listings pl
+  //     JOIN Shopping_Cart sc ON pl.seller_email = sc.listing_seller_email AND pl.listing_id = sc.listing_id
+  //     WHERE sc.buyer_email = ?`,
+  //   )
+  //   .all(email) as result[];
 
-    cartQuantity: number;
-  }
-
-  const cartItems: result[] = db
+  const cartRows: CartRow[] = db
     .prepare(
-      `SELECT pl.*, sc.quantity AS cartQuantity FROM Product_Listings pl
-      JOIN Shopping_Cart sc ON pl.seller_email = sc.listing_seller_email AND pl.listing_id = sc.listing_id
-      WHERE sc.buyer_email = ?`,
+      `SELECT
+          pl.*,
+          sc.quantity AS cartQuantity,
+          SR.avg_rating,
+          SR.review_count
+        FROM Product_Listings pl
+        JOIN Shopping_Cart sc
+          ON sc.listing_seller_email = pl.seller_email
+          AND sc.listing_id = pl.listing_id
+        LEFT JOIN (
+          SELECT
+            O.seller_email,
+            COUNT(R.rating) AS review_count,
+            AVG(R.rating) AS avg_rating
+          FROM Orders O
+          JOIN Reviews R
+            ON R.order_id = O.order_id
+          GROUP BY O.seller_email
+        ) AS SR
+          ON SR.seller_email = pl.seller_email
+        WHERE sc.buyer_email = ?`,
     )
-    .all(email) as result[];
+    .all(email) as CartRow[];
 
   // Map the results to the CartItem type
-  const cart: CartItem[] = cartItems.map((item) => ({
+  const cart: CartItem[] = cartRows.map((item) => ({
     product: {
-      seller_email: item.seller_email,
-      listing_id: item.listing_id,
-      category: item.category,
-      product_title: item.product_title,
-      product_name: item.product_name,
-      product_description: item.product_description,
-      quantity: item.quantity,
-      product_price: item.product_price,
-      status: item.status,
+      info: {
+        seller_email: item.seller_email,
+        listing_id: item.listing_id,
+        category: item.category,
+        product_title: item.product_title,
+        product_name: item.product_name,
+        product_description: item.product_description,
+        quantity: item.quantity,
+        product_price: item.product_price,
+        status: item.status,
+      },
+      seller_stats: {
+        avg_rating: item.avg_rating ?? 0,
+        review_count: item.review_count ?? 0,
+      },
     },
     quantity: item.cartQuantity,
   }));

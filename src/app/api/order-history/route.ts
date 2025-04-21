@@ -1,4 +1,4 @@
-import { ProductOrder } from "@/services/orderService"; // Import the new type
+import { ProductOrderWStats } from "@/db/models";
 import { getOrdersByBuyer } from "@/services/orderService";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
@@ -12,7 +12,9 @@ export async function GET(req: NextRequest) {
 
   const buyer_email = session.user.email;
 
-  const productOrders: ProductOrder[] | null = await getOrdersByBuyer(buyer_email).catch((err: any) => {
+  const productOrders: ProductOrderWStats[] | null = await getOrdersByBuyer(
+    buyer_email,
+  ).catch((err: any) => {
     console.error("Error fetching orders:", err);
     return null;
   });

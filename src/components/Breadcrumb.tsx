@@ -1,7 +1,8 @@
 import { ChevronRight } from "lucide-react";
+import { JSX } from "react/jsx-dev-runtime";
 
 interface BreadcrumbProps {
-  icon?: any;
+  icon?: JSX.Element;
   path: string[];
   onNavigate: (idx: number) => void;
   className?: string;

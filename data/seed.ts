@@ -166,7 +166,7 @@ async function createTables() {
     db.exec(`
       CREATE TABLE IF NOT EXISTS Reviews (
         order_id INTEGER PRIMARY KEY,
-        review_desc TEXT NOT NULL,
+        review_desc TEXT,
         rating INTEGER NOT NULL,
         FOREIGN KEY (order_id) REFERENCES Orders(order_id) ON DELETE CASCADE ON UPDATE CASCADE
       );

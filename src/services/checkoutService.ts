@@ -17,16 +17,17 @@ export const confirmCheckout = async (
   for (const item of cart) {
     const product = item.product;
     const purchaseQty = item.quantity;
-    const cost = Math.round(product.product_price * purchaseQty * 100) / 100;
+    const cost =
+      Math.round(product.info.product_price * purchaseQty * 100) / 100;
 
-    if (purchaseQty > product.quantity) {
+    if (purchaseQty > product.info.quantity) {
       throw new Error(
-        `Not enough stock for ${product.product_title}. Available: ${product.quantity}, Requested: ${purchaseQty}`,
+        `Not enough stock for ${product.info.product_title}. Available: ${product.info.quantity}, Requested: ${purchaseQty}`,
       );
     }
 
-    if (purchaseQty == product.quantity) {
-      product.status = 2;
+    if (purchaseQty == product.info.quantity) {
+      product.info.status = 2;
     }
 
     db.prepare(
@@ -35,9 +36,9 @@ export const confirmCheckout = async (
             WHERE seller_email = ? AND listing_id = ?`,
     ).run(
       purchaseQty,
-      product.status,
-      product.seller_email,
-      product.listing_id,
+      product.info.status,
+      product.info.seller_email,
+      product.info.listing_id,
     );
 
     const result = db
@@ -47,8 +48,8 @@ export const confirmCheckout = async (
             VALUES (?, ?, ?, ?, ?, ?)`,
       )
       .run(
-        product.seller_email,
-        product.listing_id,
+        product.info.seller_email,
+        product.info.listing_id,
         buyer_email,
         formattedDate,
         purchaseQty,
@@ -59,7 +60,7 @@ export const confirmCheckout = async (
 
     db.prepare(`UPDATE Sellers SET balance = balance + ? WHERE email = ?`).run(
       cost,
-      product.seller_email,
+      product.info.seller_email,
     );
   }
 

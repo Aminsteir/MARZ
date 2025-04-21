@@ -71,6 +71,16 @@ export interface Product_Listing {
   status: number;
 }
 
+export interface Seller_Stats {
+  review_count: number;
+  avg_rating: number;
+}
+
+export interface ProductWithStats {
+  info: Product_Listing;
+  seller_stats: Seller_Stats;
+}
+
 export interface Order {
   order_id: number;
   seller_email: string;
@@ -81,7 +91,12 @@ export interface Order {
   payment: number;
 }
 
-export interface ProductOrder extends Order, Product_Listing {}
+export interface ProductOrderWStats {
+  product: Product_Listing;
+  order: Order;
+  seller_stats: Seller_Stats;
+  buyer_review: Review | null;
+}
 
 export interface Review {
   order_id: number;
@@ -97,7 +112,7 @@ export interface CartItemRaw {
 }
 
 export interface CartItem {
-  product: Product_Listing;
+  product: ProductWithStats;
   quantity: number;
 }
 

@@ -4,7 +4,8 @@ import { useRouter } from "next/navigation";
 import { UserRole, CartItem } from "@/db/models";
 import { useEffect, useState } from "react";
 import LoadingScreen from "@/components/LoadingScreen";
-import { Minus, Plus, Trash, Star } from "lucide-react";
+import { Minus, Plus, Trash } from "lucide-react";
+import ReviewBar from "@/components/ReviewBar";
 
 export default function ShoppingCart() {
   const router = useRouter();
@@ -46,7 +47,7 @@ export default function ShoppingCart() {
     if (!cart) return;
     const total = cart
       .reduce(
-        (acc, item) => acc + item.product.product_price * item.quantity,
+        (acc, item) => acc + item.product.info.product_price * item.quantity,
         0,
       )
       .toFixed(2);
@@ -55,7 +56,7 @@ export default function ShoppingCart() {
 
   const handleQuantityChange = async (index: number, newQty: number) => {
     const item = cart[index];
-    const maxQty = item.product.quantity;
+    const maxQty = item.product.info.quantity;
     const finalQty = Math.max(1, Math.min(newQty, maxQty));
 
     async function updateQuantity() {
@@ -65,8 +66,8 @@ export default function ShoppingCart() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          seller_email: item.product.seller_email,
-          listing_id: item.product.listing_id,
+          seller_email: item.product.info.seller_email,
+          listing_id: item.product.info.listing_id,
           quantity: finalQty,
         }),
       });
@@ -98,8 +99,8 @@ export default function ShoppingCart() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          seller_email: item.product.seller_email,
-          listing_id: item.product.listing_id,
+          seller_email: item.product.info.seller_email,
+          listing_id: item.product.info.listing_id,
           quantity: 0,
         }),
       });
@@ -124,11 +125,6 @@ export default function ShoppingCart() {
     router.push("/checkout");
   };
 
-  // TODO: retrieve seller average rating -- whenever the review task is completed
-  const getRating = (email: string): number => {
-    return +(4).toFixed(1);
-  };
-
   if (!session || loading) {
     return <LoadingScreen />;
   }
@@ -144,12 +140,12 @@ export default function ShoppingCart() {
           <div className="space-y-6">
             {cart.map((item, index) => (
               <div
-                key={item.product.listing_id}
+                key={item.product.info.listing_id}
                 className="p-4 border rounded-lg shadow-sm flex flex-col gap-2"
               >
                 {/* Title */}
                 <div className="text-lg font-semibold">
-                  {item.product.product_title}
+                  {item.product.info.product_title}
                 </div>
 
                 {/* Seller + Rating */}
@@ -157,31 +153,18 @@ export default function ShoppingCart() {
                   <span>
                     Sold by:{" "}
                     <span className="font-medium">
-                      {item.product.seller_email}
+                      {item.product.info.seller_email}
                     </span>
                   </span>
-                  <span className="flex items-center gap-1 text-yellow-600">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star
-                        key={i}
-                        size={14}
-                        fill={
-                          i + 1 <= getRating(item.product.seller_email)
-                            ? "currentColor"
-                            : "none"
-                        }
-                        stroke="currentColor"
-                      />
-                    ))}
-                    <span className="text-xs text-gray-500 ml-1">
-                      ({getRating(item.product.seller_email).toFixed(1)})
-                    </span>
-                  </span>
+                  <ReviewBar
+                    rating={item.product.seller_stats.avg_rating}
+                    count={item.product.seller_stats.review_count}
+                  />
                 </div>
 
                 {/* Category */}
                 <div className="text-sm text-gray-500">
-                  {item.product.category}
+                  {item.product.info.category}
                 </div>
 
                 {/* Price + Quantity + Remove row */}
@@ -204,7 +187,7 @@ export default function ShoppingCart() {
                         onClick={() =>
                           handleQuantityChange(index, item.quantity + 1)
                         }
-                        disabled={item.quantity >= item.product.quantity}
+                        disabled={item.quantity >= item.product.info.quantity}
                         className="p-1 disabled:opacity-40 cursor-pointer"
                       >
                         <Plus size={16} />
@@ -222,14 +205,16 @@ export default function ShoppingCart() {
 
                     {/* Max quantity */}
                     <div className="text-xs text-gray-400">
-                      Max: {item.product.quantity}
+                      Max: {item.product.info.quantity}
                     </div>
                   </div>
 
                   {/* Price */}
                   <div className="text-md font-semibold">
                     Price: $
-                    {(item.product.product_price * item.quantity).toFixed(2)}
+                    {(item.product.info.product_price * item.quantity).toFixed(
+                      2,
+                    )}
                   </div>
                 </div>
               </div>
@@ -246,10 +231,9 @@ export default function ShoppingCart() {
               <button
                 onClick={handleCheckout}
                 className="mt-4 bg-yellow-500 hover:bg-yellow-600 text-black font-medium px-6 py-2 rounded cursor-pointer"
-              >                
+              >
                 Proceed to Checkout
               </button>
-              
             </div>
           </div>
         </>
