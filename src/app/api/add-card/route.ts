@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
 import { Credit_Card, UserRole } from "@/db/models";
 
-// Method: POST to add a card for a Buyer if successful; else, show an error message
+// Method POST: if succesful, add a card for a Buyer; else, show an error message
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
   // check if the user is a Buyer
