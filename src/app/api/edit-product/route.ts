@@ -4,8 +4,10 @@ import { NextResponse } from "next/server";
 import { authOptions } from "../auth/[...nextauth]/route";
 import { UserRole } from "@/db/models";
 
+// Method POST: if successful, the Seller editted a Product listing; else, show an error message
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
+  // check if the user is Seller; if not, throw unauthoritzed error message since only Sellers can edit products
   if (
     !session ||
     !session.user ||
@@ -16,6 +18,7 @@ export async function POST(req: Request) {
 
   const body = await req.json();
 
+  // get Seller email
   const sellerEmail = body.seller_email;
 
   // check if the user is the owner of the listing
@@ -26,6 +29,7 @@ export async function POST(req: Request) {
     );
   }
 
+  // getting information and status of the updateProduct() method
   const status = await updateProduct(body)
     .then(() => true)
     .catch((err: any) => {
@@ -33,6 +37,7 @@ export async function POST(req: Request) {
       return false;
     });
 
+  // get status and message of the action
   if (status) {
     return NextResponse.json(
       { message: "Product listed edited successfully" },
