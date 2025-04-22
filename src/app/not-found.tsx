@@ -1,6 +1,8 @@
+/** This page is used as our error message to the user */
 "use client";
 import { useRouter } from "next/navigation";
 
+// Define 'Page Not Found' page and an option to return to Home Page so that the user does not get stuck in an error page
 export default function NotFound() {
   const router = useRouter();
   return (
