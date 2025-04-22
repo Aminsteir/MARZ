@@ -4,8 +4,10 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
 import { Credit_Card, UserRole } from "@/db/models";
 
+// Method: POST to add a card for a Buyer if successful; else, show an error message
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
+  // check if the user is a Buyer
   if (
     !session ||
     !session.user ||
@@ -14,9 +16,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
+  // get Buyer's email
   const email = session.user.email;
   const body = await req.json();
 
+  // get the inputted credit card information
   const card: Credit_Card = {
     credit_card_num: body.credit_card_num,
     expire_month: body.expire_month,
@@ -26,6 +30,7 @@ export async function POST(req: Request) {
     owner_email: email,
   };
 
+  // add the credit card to the user's account
   const status = await addCreditCard(card)
     .then(() => true)
     .catch((err) => {
@@ -33,12 +38,14 @@ export async function POST(req: Request) {
       return false;
     });
 
+  // added card successfully
   if (status) {
     return NextResponse.json(
       { message: "Card added successfully", data: card },
       { status: 201 },
     );
   }
-
+  
+  // failed to add card
   return NextResponse.json({ message: "Failed to add card" }, { status: 500 });
 }
