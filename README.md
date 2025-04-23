@@ -43,3 +43,24 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 - [TypeScript](https://www.typescriptlang.org/)
 - [SQLite3](https://www.sqlite.org/index.html)
 - [Docker](https://www.docker.com/)
+
+## User Functionalities
+The following list indicates what each user is able to do, depending on their role. 
+
+#### Buyers
+- update profile
+- user registration
+- look up products
+- add to shopping cart
+- checkout from shopping cart
+
+#### Sellers
+- update profile
+- user registration
+- list products
+- edit product listing
+
+#### HelpDesk
+- update profile
+- user registration
+- handle update password requests
