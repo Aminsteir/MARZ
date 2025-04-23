@@ -48,19 +48,25 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 The following list indicates what each user is able to do, depending on their role. 
 
 #### Buyers
-- update profile
+- user login
 - user registration
-- look up products
+- update profile
+- look up products and categories
 - add to shopping cart
-- checkout from shopping cart
+- checkout from shopping cart (place orders)
+- review products they have purchased
 
 #### Sellers
-- update profile
+- user login
 - user registration
+- update profile
 - list products
 - edit product listing
+- view Buyer reviews
 
 #### HelpDesk
-- update profile
+- user login
 - user registration
+- update profile
+- view requests from Buyers and Users
 - handle update password requests
