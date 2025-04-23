@@ -44,29 +44,42 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 - [SQLite3](https://www.sqlite.org/index.html)
 - [Docker](https://www.docker.com/)
 
-## User Functionalities
+## Functionalities by User Role
 The following list indicates what each user is able to do, depending on their role. 
 
 #### Buyers
-- user login
 - user registration
-- update profile
-- look up products and categories
-- add to shopping cart
-- checkout from shopping cart (place orders)
+- user login (password is securely hashed)
+- view and update profile (excluding email) 
+- look up products (by keyword, filters, and categories)
+- add products to shopping cart
+- checkout and place orders from shopping cart
+- view order confirmation with price and Seller info
 - review products they have purchased
 
 #### Sellers
-- user login
 - user registration
-- update profile
-- list products
-- edit product listing
+- user login (password is securely hashed)
+- view and update profile (excluding email) 
+- create product listings
+- remove and edit product listings
 - view Buyer reviews
 
 #### HelpDesk
-- user login
 - user registration
-- update profile
+- user login (password is securely hashed)
+- view and update profile (excluding email) 
 - view requests from Buyers and Users
 - handle update password requests
+
+## Core Functions Implemented
+-[x] User Authentication and Role-Specific Dashboards
+-[x] Category Hierarchy
+-[x] Product List Management (by Sellers)
+-[x] Product Detail and Ordering (by Buyers)
+-[x] Reviews (by Buyers)
+-[x] Search Product listings
+-[x] User Registration and Profile update
+
+## Bonus Features Implemented
+-[x] Shoppng Cart (for Buyers)
