@@ -183,6 +183,17 @@ async function createTables() {
         FOREIGN KEY (listing_seller_email, listing_id) REFERENCES Product_Listings(seller_email, listing_id) ON DELETE CASCADE ON UPDATE CASCADE
       );
     `);
+
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS Promoted_Products (
+        seller_email TEXT NOT NULL,
+        listing_id INTEGER NOT NULL,
+        promotion_start_time TEXT NOT NULL,
+        PRIMARY KEY (seller_email, listing_id),
+        FOREIGN KEY (seller_email, listing_id) REFERENCES Product_Listings(seller_email, listing_id) ON DELETE CASCADE ON UPDATE CASCADE
+      );
+    `);
+    
   } catch (error) {
     console.error("Error:", error);
   } finally {

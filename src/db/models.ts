@@ -124,3 +124,9 @@ export interface Shopping_Cart {
   listing_id: number;
   quantity: number;
 }
+
+export interface Promoted_Product{
+  seller_email: string;
+  listing_id: number;
+  promotion_start_time: Date;
+}
