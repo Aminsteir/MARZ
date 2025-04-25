@@ -113,7 +113,10 @@ export default function ShopPage() {
         .then((j) => {
           const products = j.data || [];
           products.sort(
-            (a, b) => b.seller_stats.avg_rating - a.seller_stats.avg_rating,
+            (a, b) =>
+              b.seller_stats.avg_rating -
+              a.seller_stats.avg_rating +
+              0.2 * (b.seller_stats.review_count - a.seller_stats.review_count),
           );
           setProducts(products);
         })
@@ -206,7 +209,7 @@ export default function ShopPage() {
         {/* View Cart */}
         <button
           onClick={() => router.push("/cart")}
-          className="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          className="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 cursor-pointer"
         >
           View Cart
         </button>
@@ -253,45 +256,49 @@ export default function ShopPage() {
               )}
             </aside>
           )}
-
-          {/* Products grid */}
-          <section className="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {listToRender.length > 0 ? (
-              listToRender.map((p) => (
-                <div
-                  key={`${p.info.seller_email}-${p.info.listing_id}`}
-                  className={`border p-4 rounded cursor-pointer hover:shadow-md ${
-                    p.info.status > 1 ? "bg-red-100" : "bg-white"
-                  }`}
-                  onClick={() => setSelected(p)}
-                >
-                  <h3 className="font-semibold">{p.info.product_title}</h3>
-                  <p className="text-sm truncate">
-                    {p.info.product_description}
-                  </p>
-                  <div className="flex flex-row gap-1 w-full items-center">
-                    <p className="text-sm text-gray-600">
-                      Seller: {p.info.seller_email}
-                    </p>
-                    <ReviewBar
-                      rating={p.seller_stats.avg_rating}
-                      count={p.seller_stats.review_count}
-                    />
-                  </div>
-                  <p className="mt-2 font-bold">
-                    ${p.info.product_price.toFixed(2)}
-                    {p.info.status > 1 ? " (Out of Stock)" : ""}
-                  </p>
-                </div>
-              ))
-            ) : (
-              <p className="text-gray-500 col-span-full">
-                {isSearching
-                  ? `No results for “${searchTerm}”`
-                  : `No products in “${parent}”`}
-              </p>
+          <div className="flex-1 flex flex-col gap-2">
+            {listToRender.length > 0 && parent === "Root" && (
+              <h2 className="font-bold mb-2">Promoted Products</h2>
             )}
-          </section>
+            {/* Products grid */}
+            <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 h-min">
+              {listToRender.length > 0 ? (
+                listToRender.map((p) => (
+                  <div
+                    key={`${p.info.seller_email}-${p.info.listing_id}`}
+                    className={`border p-4 rounded cursor-pointer hover:shadow-md ${
+                      p.info.status > 1 ? "bg-red-100" : "bg-white"
+                    }`}
+                    onClick={() => setSelected(p)}
+                  >
+                    <h3 className="font-semibold">{p.info.product_title}</h3>
+                    <p className="text-sm truncate">
+                      {p.info.product_description}
+                    </p>
+                    <div className="flex flex-row gap-1 w-full items-center flex-wrap">
+                      <p className="text-sm text-gray-600">
+                        Seller: {p.info.seller_email}
+                      </p>
+                      <ReviewBar
+                        rating={p.seller_stats.avg_rating}
+                        count={p.seller_stats.review_count}
+                      />
+                    </div>
+                    <p className="mt-2 font-bold">
+                      ${p.info.product_price.toFixed(2)}
+                      {p.info.status > 1 ? " (Out of Stock)" : ""}
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-500 col-span-full">
+                  {isSearching
+                    ? `No results for “${searchTerm}”`
+                    : `No products in “${parent}”`}
+                </p>
+              )}
+            </section>
+          </div>
         </div>
       )}
 

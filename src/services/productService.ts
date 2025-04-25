@@ -1,5 +1,10 @@
 import db from "@/db/db";
-import { Category, Product_Listing, ProductWithStats, Promoted_Product } from "@/db/models";
+import {
+  Category,
+  Product_Listing,
+  ProductWithStats,
+  Promoted_Product,
+} from "@/db/models";
 
 export const listProduct = async (listingInfo: any) => {
   const listing_id = (
@@ -209,45 +214,47 @@ export const searchProducts = async (query: string) => {
   return products;
 };
 
-
 export const promoteProduct = async (product_info: any) => {
   const { seller_email, listing_id } = product_info;
-  
+
   // First, find the product listing and get its price
-  const product = db.prepare(
-    "SELECT * FROM Product_Listings WHERE seller_email = ? AND listing_id = ?"
-  ).get(seller_email, listing_id) as Product_Listing;
-  
+  const product = db
+    .prepare(
+      "SELECT * FROM Product_Listings WHERE seller_email = ? AND listing_id = ?",
+    )
+    .get(seller_email, listing_id) as Product_Listing;
+
   if (!product) {
     throw new Error("Product not found");
   }
-  
+
   // Promotion fee: 5% of product price
   const promotionFee = product.product_price * 0.05;
-  
+
   // Check if seller has enough balance
-  const seller = db.prepare(
-    "SELECT balance FROM Sellers WHERE email = ?"
-  ).get(seller_email) as { balance: number };
-  
+  const seller = db
+    .prepare("SELECT balance FROM Sellers WHERE email = ?")
+    .get(seller_email) as { balance: number };
+
   if (!seller) {
     throw new Error("Seller not found");
   }
-  
+
   if (seller.balance < promotionFee) {
     throw new Error("Insufficient balance for promotion");
   }
-  
+
   // Use transaction to ensure both db statements run
   db.transaction(() => {
     // Subtract promotion fee from seller's balance
-    db.prepare(
-      "UPDATE Sellers SET balance = balance - ? WHERE email = ?"
-    ).run(promotionFee, seller_email);
-    
+    db.prepare("UPDATE Sellers SET balance = balance - ? WHERE email = ?").run(
+      promotionFee,
+      seller_email,
+    );
+
     // Add product to Promoted_Products table
     db.prepare(
-      "INSERT OR REPLACE INTO Promoted_Products (seller_email, listing_id, promotion_start_time) VALUES (?, ?, datetime('now'))"
+      "INSERT OR REPLACE INTO Promoted_Products (seller_email, listing_id, promotion_start_time) VALUES (?, ?, datetime('now'))",
     ).run(seller_email, listing_id);
   })();
 };
@@ -255,37 +262,62 @@ export const promoteProduct = async (product_info: any) => {
 export const getPromotedProductsBySeller = async (sellerEmail: string) => {
   // Get all promoted products for this seller
   const promotedProducts = db
-    .prepare(`
+    .prepare(
+      `
       SELECT * FROM Promoted_Products WHERE seller_email = ?
-    `)
+    `,
+    )
     .all(sellerEmail) as (Promoted_Product & {
-      promotion_start_time: string;
-    })[];
+    promotion_start_time: string;
+  })[];
 
   return promotedProducts;
 };
 
-
 export const getPromotedProducts = async () => {
   // Get all promoted products for this seller
-  const promotedProducts = db
-    .prepare(`
-      SELECT 
-        pp.seller_email,
-        pp.listing_id,
-        pp.promotion_start_time,
-        pl.product_title,
-        pl.product_price,
-        pl.product_description,
-        pl.category,
-        pl.quantity,
-        pl.status
-      FROM Promoted_Products pp
-      JOIN Product_Listings pl ON pp.seller_email = pl.seller_email AND pp.listing_id = pl.listing_id
-    `)
+  const rows = db
+    .prepare(
+      `SELECT
+        PL.*,
+        COUNT(R.rating) AS review_count,
+        AVG(R.rating) AS avg_rating
+      FROM Promoted_Products PP
+      JOIN Product_Listings PL
+        ON PP.seller_email = PL.seller_email
+        AND PP.listing_id = PL.listing_id
+      LEFT JOIN Orders O
+        ON O.seller_email = PL.seller_email
+        AND O.listing_id = PL.listing_id
+      LEFT JOIN Reviews R
+        ON R.order_id = O.order_id
+      WHERE PL.status != 0
+      GROUP BY
+        PL.seller_email,
+        PL.listing_id`,
+    )
     .all() as (Product_Listing & {
-      promotion_start_time: string;
-    })[];
+    review_count: number;
+    avg_rating: number;
+  })[];
+
+  const promotedProducts: ProductWithStats[] = rows.map((row) => ({
+    info: {
+      seller_email: row.seller_email,
+      listing_id: row.listing_id,
+      category: row.category,
+      product_title: row.product_title,
+      product_name: row.product_name,
+      product_description: row.product_description,
+      quantity: row.quantity,
+      product_price: row.product_price,
+      status: row.status,
+    },
+    seller_stats: {
+      review_count: row.review_count,
+      avg_rating: row.avg_rating,
+    },
+  }));
 
   return promotedProducts;
 };

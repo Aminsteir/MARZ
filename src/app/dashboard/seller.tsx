@@ -2,7 +2,6 @@
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Product_Listing } from "@/db/models";
-import { useSession } from "next-auth/react";
 
 interface PromotedProduct {
   seller_email: string;
@@ -19,9 +18,12 @@ interface PromotedProduct {
 export default function SellerDash() {
   const router = useRouter();
   const [listings, setListings] = useState<Product_Listing[]>([]); // Store product listings
-  const [promotedProducts, setPromotedProducts] = useState<PromotedProduct[]>([]);
+  const [promotedProducts, setPromotedProducts] = useState<PromotedProduct[]>(
+    [],
+  );
   const [showPromotePopup, setShowPromotePopup] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<Product_Listing | null>(null);
+  const [selectedProduct, setSelectedProduct] =
+    useState<Product_Listing | null>(null);
   const [promotionError, setPromotionError] = useState("");
   const [isPromoting, setIsPromoting] = useState(false);
 
@@ -30,18 +32,18 @@ export default function SellerDash() {
     const fetchData = async () => {
       await Promise.all([fetchListings(), fetchPromotedProducts()]);
     };
-    
+
     fetchData();
   }, []);
 
   const fetchListings = async () => {
     const res = await fetch("/api/seller-products");
-    
+
     if (!res.ok) {
       setListings([]);
       return;
     }
-    
+
     const products = (await res.json()).data as Product_Listing[];
     setListings(products);
   };
@@ -59,7 +61,9 @@ export default function SellerDash() {
 
   const isProductPromoted = (product: Product_Listing) => {
     return promotedProducts.some(
-      (promo) => promo.listing_id === product.listing_id && promo.seller_email === product.seller_email
+      (promo) =>
+        promo.listing_id === product.listing_id &&
+        promo.seller_email === product.seller_email,
     );
   };
 
@@ -70,32 +74,34 @@ export default function SellerDash() {
 
   const handlePromoteConfirm = async () => {
     if (!selectedProduct) return;
-    
+
     setIsPromoting(true);
     setPromotionError("");
-    
+
     try {
       const response = await fetch("/api/promote-product", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ listing_id: selectedProduct.listing_id })
+        body: JSON.stringify({ listing_id: selectedProduct.listing_id }),
       });
-      
+
       const data = await response.json();
-      
+
       if (!response.ok) {
         if (data.errorType === "INSUFFICIENT_BALANCE") {
-          setPromotionError("You don't have enough balance for this promotion. Please add funds to your account.");
+          setPromotionError(
+            "You don't have enough balance for this promotion. Please add funds to your account.",
+          );
         } else {
           setPromotionError(data.message || "Failed to promote product.");
         }
         return;
       }
-      
+
       // Success! Close the popup
       setShowPromotePopup(false);
       setSelectedProduct(null);
-      
+
       // Refresh both listings and promoted products
       await Promise.all([fetchListings(), fetchPromotedProducts()]);
       alert("Product promoted successfully");
@@ -121,7 +127,7 @@ export default function SellerDash() {
       <div className="flex flex-row w-full justify-center items-center mt-4 gap-4">
         <button
           onClick={() => router.push("/new-listing")}
-          className="mt-4 px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 cursor-pointer w-xs"
+          className="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 cursor-pointer w-xs"
         >
           List New Product
         </button>
@@ -150,7 +156,7 @@ export default function SellerDash() {
             </p>
             <div className="flex space-x-2 mt-2">
               <button
-                className="px-4 py-1 bg-gray-200 hover:bg-gray-300 rounded"
+                className="px-4 py-1 bg-gray-200 hover:bg-gray-300 rounded cursor-pointer"
                 onClick={() =>
                   router.push(
                     `/edit-listing?seller_email=${encodeURIComponent(product.seller_email)}&listing_id=${encodeURIComponent(product.listing_id)}`,
@@ -159,14 +165,14 @@ export default function SellerDash() {
               >
                 Edit
               </button>
-              
+
               {isProductPromoted(product) ? (
                 <span className="px-4 py-1 bg-green-500 text-white rounded opacity-90 cursor-default">
                   Promoted
                 </span>
               ) : (
                 <button
-                  className="px-4 py-1 bg-yellow-500 text-white hover:bg-yellow-600 rounded"
+                  className="px-4 py-1 bg-yellow-500 text-white hover:bg-yellow-600 rounded cursor-pointer"
                   onClick={() => handlePromote(product)}
                 >
                   Promote
@@ -183,18 +189,20 @@ export default function SellerDash() {
           <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
             <h2 className="text-xl font-bold mb-4">Promote your product?</h2>
             <p className="mb-4">
-              Promote "{selectedProduct?.product_title}" for better visibility and increased sales.
+              Promote "{selectedProduct?.product_title}" for better visibility
+              and increased sales.
             </p>
             <p className="font-semibold mb-2">
-              Promotion fee: ${(selectedProduct?.product_price * 0.05).toFixed(2)}
+              Promotion fee: $
+              {(selectedProduct?.product_price * 0.05).toFixed(2)}
             </p>
-            
+
             {promotionError && (
               <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
                 {promotionError}
               </div>
             )}
-            
+
             <div className="flex justify-end space-x-3">
               <button
                 onClick={handlePromoteCancel}
