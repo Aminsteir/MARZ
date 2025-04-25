@@ -109,7 +109,14 @@ export default function ShopPage() {
         .catch(() => setSubcats([])),
       fetch(`/api/products-by-category?category=${encodeURIComponent(parent)}`)
         .then((r) => r.json() as Promise<ProductsResponse>)
-        .then((j) => setProducts(j.data || []))
+        // .then((j) => setProducts(j.data || []))
+        .then((j) => {
+          const products = j.data || [];
+          products.sort(
+            (a, b) => b.seller_stats.avg_rating - a.seller_stats.avg_rating,
+          );
+          setProducts(products);
+        })
         .catch(() => setProducts([])),
     ]).finally(() => setLoading(false));
   }, [parent, searchTerm]);
@@ -262,6 +269,15 @@ export default function ShopPage() {
                   <p className="text-sm truncate">
                     {p.info.product_description}
                   </p>
+                  <div className="flex flex-row gap-1 w-full items-center">
+                    <p className="text-sm text-gray-600">
+                      Seller: {p.info.seller_email}
+                    </p>
+                    <ReviewBar
+                      rating={p.seller_stats.avg_rating}
+                      count={p.seller_stats.review_count}
+                    />
+                  </div>
                   <p className="mt-2 font-bold">
                     ${p.info.product_price.toFixed(2)}
                     {p.info.status > 1 ? " (Out of Stock)" : ""}
