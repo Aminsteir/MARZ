@@ -1,10 +1,13 @@
+// API Route: /api/profile  - Retrieve and update authenticated user's profile
 import { NextRequest, NextResponse } from "next/server";
 import db from "@/db/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
 import { UserRole } from "@/db/models";
 
-/** GET method: reutnrs the user's profile info. **/
+/**
+ * GET handler: fetch user profile details depending on their role (Buyer, Seller, Helpdesk)
+ */
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) {
@@ -80,7 +83,9 @@ export async function GET(req: NextRequest) {
   return NextResponse.json(profile, { status: 200 });
 }
 
-/** PUT method: update the profile **/
+/**
+ * PUT handler: update user profile fields based on role
+ */
 export async function PUT(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) {

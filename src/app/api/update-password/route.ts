@@ -1,3 +1,4 @@
+// API Route: /api/update-password  - Change authenticated user's password
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
@@ -6,6 +7,9 @@ import {
   updateUserPassword,
 } from "@/services/userService";
 
+/**
+ * POST handler: validate old password and set new password (Authenticated users)
+ */
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session || !session.user) {

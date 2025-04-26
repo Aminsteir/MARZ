@@ -1,3 +1,4 @@
+// API Route: /api/auth/[...nextauth]  - Configure NextAuth authentication
 import NextAuth, { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { validateUserCredentials, getUserRole } from "@/services/userService";

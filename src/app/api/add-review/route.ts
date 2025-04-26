@@ -1,10 +1,13 @@
+// API Route: /api/add-review  - Buyer submits a product review
 import { addReview } from "@/services/reviewService";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
 import { Review, UserRole } from "@/db/models";
 
-// Method POST: if successful, add a review from a Buyer; else, show an error message
+/**
+ * POST handler: add a review for an order (Buyer role required)
+ */
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
   // check if the user is a Buyer

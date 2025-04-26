@@ -1,7 +1,11 @@
+// API Route: /api/traverse-category  - Retrieve subcategories for a parent category
 import { Category } from "@/db/models";
 import { getChildrenCategories } from "@/services/categoryService";
 import { NextResponse } from "next/server";
 
+/**
+ * GET handler: fetch child categories based on parent category
+ */
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const parent = searchParams.get("parent");

@@ -1,10 +1,13 @@
+// API Route: /api/edit-product  - Edit a product listing
 import { updateProduct } from "@/services/productService";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import { authOptions } from "../auth/[...nextauth]/route";
 import { UserRole } from "@/db/models";
 
-// Method POST: if successful, the Seller editted a Product listing; else, show an error message
+/**
+ * POST handler: update product listing (Seller or Helpdesk role required)
+ */
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
   // check if the user is Seller; if not, throw unauthoritzed error message since only Sellers can edit products

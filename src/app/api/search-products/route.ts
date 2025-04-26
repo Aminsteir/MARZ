@@ -1,7 +1,11 @@
+// API Route: /api/search-products  - Search product listings by text query
 import { ProductWithStats } from "@/db/models";
 import { searchProducts } from "@/services/productService";
 import { NextResponse } from "next/server";
 
+/**
+ * GET handler: product search based on query parameter
+ */
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const query = searchParams.get("query");

@@ -1,3 +1,4 @@
+// Provide authentication session context to the app via NextAuth
 "use client";
 import { SessionProvider } from "next-auth/react";
 

@@ -1,3 +1,4 @@
+// Service functions for product listings: create, retrieve, update, and search products
 import db from "@/db/db";
 import {
   Category,
@@ -6,6 +7,9 @@ import {
   Promoted_Product,
 } from "@/db/models";
 
+/**
+ * Create a new product listing for a seller
+ */
 export const listProduct = async (listingInfo: any) => {
   const listing_id = (
     db
@@ -46,6 +50,9 @@ export const listProduct = async (listingInfo: any) => {
   }
 };
 
+/**
+ * Retrieve a single product listing by seller and listing id
+ */
 export const getProduct = async (sellerEmail: string, listingId: number) => {
   const product: Product_Listing = db
     .prepare(
@@ -60,6 +67,9 @@ export const getProduct = async (sellerEmail: string, listingId: number) => {
   return product;
 };
 
+/**
+ * Update a product listing and adjust status, stock, and related cart items
+ */
 export const updateProduct = async (productInfo: any) => {
   const product: Product_Listing = {
     seller_email: productInfo.seller_email,
@@ -101,6 +111,9 @@ export const updateProduct = async (productInfo: any) => {
   );
 };
 
+/**
+ * Get all product listings for a specific seller
+ */
 export const getProductsBySeller = async (sellerEmail: string) => {
   const products: Product_Listing[] = db
     .prepare("SELECT * FROM Product_Listings WHERE seller_email = ?")
@@ -109,6 +122,9 @@ export const getProductsBySeller = async (sellerEmail: string) => {
   return products;
 };
 
+/**
+ * Get active product listings in a category along with seller statistics
+ */
 export const getProductsByCategory = async (category: string) => {
   const cat: Category = db
     .prepare("SELECT * FROM Categories WHERE category_name = ?")
@@ -162,6 +178,9 @@ export const getProductsByCategory = async (category: string) => {
   return products;
 };
 
+/**
+ * Search for products matching a query across multiple fields
+ */
 export const searchProducts = async (query: string) => {
   const likeQuery = `%${query}%`;
   const rows = db

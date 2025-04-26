@@ -1,9 +1,13 @@
+// API Route: /api/seller-products  - Retrieve product listings for logged-in seller
 import { Product_Listing } from "@/db/models";
 import { getProductsBySeller } from "@/services/productService";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
 
+/**
+ * GET handler: fetch products for an authenticated seller
+ */
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session || !session.user) {

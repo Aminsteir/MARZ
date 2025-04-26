@@ -1,9 +1,13 @@
+// API Route: /api/seller-promoted-products  - Retrieve promoted listings for seller
 import { getPromotedProductsBySeller } from "@/services/productService";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import { authOptions } from "../auth/[...nextauth]/route";
 import { UserRole } from "@/db/models";
 
+/**
+ * GET handler: fetch promoted products for authenticated seller (Seller role required)
+ */
 export async function GET() {
   const session = await getServerSession(authOptions);
   if (

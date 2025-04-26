@@ -1,3 +1,5 @@
+// Define TypeScript interfaces for database tables and api
+
 export interface User {
   email: string;
   password: string;
@@ -125,7 +127,7 @@ export interface Shopping_Cart {
   quantity: number;
 }
 
-export interface Promoted_Product{
+export interface Promoted_Product {
   seller_email: string;
   listing_id: number;
   promotion_start_time: Date;

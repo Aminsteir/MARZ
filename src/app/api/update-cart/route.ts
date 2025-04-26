@@ -1,8 +1,12 @@
+// API Route: /api/update-cart  - Update item quantity in shopping cart
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
 import { updateCart } from "@/services/cartService";
 
+/**
+ * POST handler: update or remove cart item based on quantity (Buyer role required)
+ */
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session || !session.user) {

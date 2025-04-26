@@ -1,9 +1,13 @@
+// API Route: /api/promote-product  - Promote a product listing by debiting seller balance
 import { promoteProduct } from "@/services/productService";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import { authOptions } from "../auth/[...nextauth]/route";
 import { UserRole } from "@/db/models";
 
+/**
+ * POST handler: promote product (Seller role required)
+ */
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
   if (

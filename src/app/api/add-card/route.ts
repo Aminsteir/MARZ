@@ -1,10 +1,13 @@
+// API Route: /api/add-card  - Add a credit card for authenticated buyers
 import { addCreditCard } from "@/services/userService";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
 import { Credit_Card, UserRole } from "@/db/models";
 
-// Method POST: if succesful, add a card for a Buyer; else, show an error message
+/**
+ * POST handler: add credit card for authenticated buyer (Buyer role required)
+ */
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
   // check if the user is a Buyer

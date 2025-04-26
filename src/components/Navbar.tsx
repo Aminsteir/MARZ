@@ -1,3 +1,5 @@
+// Site navigation bar showing links and actions based on user session
+
 "use client";
 import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";

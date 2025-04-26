@@ -1,3 +1,10 @@
+/**
+ * Script to reset and seed the SQLite database from CSV files.
+ * - Deletes existing database
+ * - Creates necessary tables
+ * - Loads CSV data into tables
+ */
+
 import Database from "better-sqlite3";
 import fs from "fs";
 import path from "path";
@@ -7,6 +14,7 @@ import bcrypt from "bcryptjs";
 
 // Define directory where the database and seed data are stored
 const dataDir = path.join(process.cwd(), "data");
+
 // Ensure that the data directory exists, create if necessary
 if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true });
@@ -27,7 +35,7 @@ const db = Database(dbPath);
 // For seeding, foreign key constraints are not enforced (child may be inserted before parent)
 db.pragma("foreign_keys = OFF");
 
-/* Read CSV */
+/** Read and parse a CSV file into rows of data */
 async function readCSV(filePath: string) {
   return new Promise((resolve, reject) => {
     const results = [];
@@ -40,7 +48,7 @@ async function readCSV(filePath: string) {
   });
 }
 
-/* Creates necessary db tables if they don't exist yet */
+/** Create all required database tables if they do not exist */
 async function createTables() {
   try {
     db.exec(`
@@ -193,7 +201,6 @@ async function createTables() {
         FOREIGN KEY (seller_email, listing_id) REFERENCES Product_Listings(seller_email, listing_id) ON DELETE CASCADE ON UPDATE CASCADE
       );
     `);
-    
   } catch (error) {
     console.error("Error:", error);
   } finally {

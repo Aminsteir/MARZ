@@ -1,6 +1,10 @@
+// API Route: /api/register  - Register a new user account
 import { registerUser } from "@/services/userService";
 import { NextResponse } from "next/server";
 
+/**
+ * POST handler: create user account
+ */
 export async function POST(req: Request) {
   const body = await req.json();
 

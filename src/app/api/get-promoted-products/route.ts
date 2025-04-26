@@ -1,6 +1,10 @@
+// API Route: /api/get-promoted-products  - Get all promoted products
 import { getPromotedProducts } from "@/services/productService"; 
 import { NextResponse } from "next/server";
 
+/**
+ * GET handler: fetch currently promoted product listings
+ */
 export async function GET() {
   try {
     const promotedProducts = await getPromotedProducts();

@@ -1,10 +1,13 @@
+// API Route: /api/add-to-cart  - Add a product to buyer's shopping cart
 import { addProductToCart } from "@/services/cartService";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
 import { UserRole } from "@/db/models";
 
-// Method POST: if successful, add a Product to a Buyer's cart; else, show an error message
+/**
+ * POST handler: add product to cart (Buyer role required)
+ */
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
   // check if the user is a Buyer (only Buyer's can add to a shopping cart)

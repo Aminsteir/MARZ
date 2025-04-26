@@ -1,9 +1,13 @@
+// API Route: /api/get-cards  - Retrieve buyer's saved credit cards
 import { Credit_Card, UserRole } from "@/db/models";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
 import { getCreditCards } from "@/services/userService";
 
+/**
+ * GET handler: fetch credit cards for authenticated buyer (Buyer role required)
+ */
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (

@@ -1,7 +1,11 @@
+// API Route: /api/get-product  - Fetch a product listing by seller and ID
 import { Product_Listing } from "@/db/models";
 import { getProduct } from "@/services/productService";
 import { NextRequest, NextResponse } from "next/server";
 
+/**
+ * GET handler: get product listing by sellerEmail and listingId query params
+ */
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const seller_email = searchParams.get("sellerEmail");

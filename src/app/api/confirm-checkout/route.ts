@@ -1,9 +1,12 @@
+// API Route: /api/confirm-checkout  - Complete purchase for buyer
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
 import { confirmCheckout } from "@/services/checkoutService";
 
-// Method POST: if successful, allow checkout page the checkout button is clicked from the shopping cart; else, show an error message
+/**
+ * POST handler: finalize checkout, create orders for buyer (Buyer role required)
+ */
 export async function POST(req: Request) {
     const session = await getServerSession(authOptions);
 

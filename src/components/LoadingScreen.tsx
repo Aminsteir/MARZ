@@ -1,3 +1,4 @@
+// A full-screen loading spinner
 export default function LoadingScreen() {
   return (
     <div className="w-full h-[calc(100vh-80px)] flex flex-col justify-center items-center content-center">

@@ -1,3 +1,4 @@
+// Service functions for managing the shopping cart
 import db from "@/db/db";
 import { CartItem, CartItemRaw, Product_Listing } from "@/db/models";
 
@@ -18,12 +19,18 @@ interface CartRow {
   review_count: number;
 }
 
+/**
+ * Remove all items from a buyer's shopping cart
+ */
 export const emptyCart = async (buyer_email: string) => {
   db.prepare("DELETE FROM Shopping_Cart WHERE buyer_email = ?").run(
     buyer_email,
   );
 };
 
+/**
+ * Remove a specific product listing from the buyer's cart
+ */
 export const removeFromCart = async (
   buyer_email: string,
   product_listing: Product_Listing,
@@ -33,8 +40,10 @@ export const removeFromCart = async (
   ).run(buyer_email, product_listing.seller_email, product_listing.listing_id);
 };
 
+/**
+ * Retrieve cart items, including product details and seller statistics, for a buyer
+ */
 export const getCart = async (email: string): Promise<CartItem[]> => {
-  // OLD QUERY -- Return entire cart with entire product listing info and also user cart quantity
   // const cartItems: result[] = db
   //   .prepare(
   //     `SELECT pl.*, sc.quantity AS cartQuantity FROM Product_Listings pl
@@ -94,6 +103,9 @@ export const getCart = async (email: string): Promise<CartItem[]> => {
   return cart;
 };
 
+/**
+ * Update the quantity of an item in the cart or remove it if quantity is zero
+ */
 export const updateCart = async (
   buyer_email: string,
   seller_email: string,
@@ -134,6 +146,9 @@ export const updateCart = async (
   ).run(newQuantity, buyer_email, seller_email, listing_id);
 };
 
+/**
+ * Add a new product listing to the buyer's shopping cart with specified quantity
+ */
 export const addProductToCart = async (
   buyer_email: string,
   seller_email: string,
