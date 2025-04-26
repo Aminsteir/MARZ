@@ -257,7 +257,7 @@ export default function ShopPage() {
             </aside>
           )}
           <div className="flex-1 flex flex-col gap-2">
-            {listToRender.length > 0 && parent === "Root" && (
+            {listToRender.length > 0 && parent === "Root" && !isSearching && (
               <h2 className="font-bold mb-2">Promoted Products</h2>
             )}
             {/* Products grid */}
