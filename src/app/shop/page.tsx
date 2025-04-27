@@ -257,7 +257,7 @@ export default function ShopPage() {
             </aside>
           )}
           <div className="flex-1 flex flex-col gap-2">
-            {listToRender.length > 0 && parent === "Root" && !isSearching && (
+            {parent === "Root" && !isSearching && (
               <h2 className="font-bold mb-2">Promoted Products</h2>
             )}
             {/* Products grid */}
@@ -294,7 +294,9 @@ export default function ShopPage() {
                 <p className="text-gray-500 col-span-full">
                   {isSearching
                     ? `No results for “${searchTerm}”`
-                    : `No products in “${parent}”`}
+                    : parent === "Root"
+                      ? `No currently promoted products.`
+                      : `No products in “${parent}”`}
                 </p>
               )}
             </section>
