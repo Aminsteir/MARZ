@@ -73,13 +73,14 @@ The following list indicates what each user is able to do, depending on their ro
 - handle update password requests
 
 ## Core Functions Implemented
--[x] User Authentication and Role-Specific Dashboards
--[x] Category Hierarchy
--[x] Product List Management (by Sellers)
--[x] Product Detail and Ordering (by Buyers)
--[x] Reviews (by Buyers)
--[x] Search Product listings
--[x] User Registration and Profile update
+- [x] User Authentication and Role-Specific Dashboards
+- [x] Category Hierarchy
+- [x] Product List Management (by Sellers)
+- [x] Product Detail and Ordering (by Buyers)
+- [x] Reviews (by Buyers)
+- [x] Search Product listings
+- [x] User Registration and Profile update
 
 ## Bonus Features Implemented
--[x] Shoppng Cart (for Buyers)
+- [x] Shoppng Cart (for Buyers)
+- [x] Promoted Products
