@@ -54,7 +54,7 @@ export async function GET(req: NextRequest) {
             s.balance
         FROM Users u
         JOIN Sellers s ON u.email = s.email
-        JOIN Address a ON s.seller_address_id = a.address_id
+        JOIN Address a ON s.business_address_id = a.address_id
         JOIN Zipcode_Info z ON a.zipcode = z.zipcode
         WHERE u.email = ?`,
       )
