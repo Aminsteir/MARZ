@@ -49,9 +49,9 @@ export async function GET(req: NextRequest) {
             z.city,
             z.state,
             z.zipcode,
-            z.bank_routing_number,
-            z.bank_account_number,
-            z.balance
+            s.bank_routing_number,
+            s.bank_account_number,
+            s.balance
         FROM Users u
         JOIN Sellers s ON u.email = s.email
         JOIN Address a ON s.seller_address_id = a.address_id
